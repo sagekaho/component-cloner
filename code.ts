@@ -98,15 +98,14 @@ function copyTextNode(copy: TextNode, original: TextNode) {
 }
 
 function copyRectangleNode(copy, original) {
-  console.log(copy);
   // copy['absoluteTransform'] = original['absoluteTransform'];
   // copy['backgrounds'] = original['backgrounds'];
   copy['blendMode'] = original['blendMode'];
   // copy['bottomLeftRadius'] = original['bottomLeftRadius'];
   // copy['bottomRightRadius'] = original['bottomRightRadius'];
   copy['constraints'] = original['constraints'];
-  copy['cornerRadius'] = original['cornerRadius'];
-  copy['cornerSmoothing'] = original['cornerSmoothing'];
+  // copy['cornerRadius'] = original['cornerRadius'];
+  // copy['cornerSmoothing'] = original['cornerSmoothing'];
   copy['dashPattern'] = original['dashPattern'];
   copy['effectStyleId'] = original['effectStyleId'];
   copy['effects'] = original['effects']; // might be problem
@@ -135,7 +134,20 @@ function copyRectangleNode(copy, original) {
   return;
 }
 function copySliceNode(copy, original) {
-
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  copy['constraints'] = original['constraints'];
+  copy['exportSettings'] = original['exportSettings'];
+  // copy['height'] = original['height'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  // copy['relativeTransform'] = original['relativeTransform'];
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
+  return;
 }
 
 function copyFrameNode(copy, original) {
@@ -151,23 +163,172 @@ function copyBooleanOperationNode(copy, original) {
 }
 
 function copyVectorNode(copy, original) {
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  copy['blendMode'] = original['blendMode'];
+  copy['constraints'] = original['constraints'];
+  copy['cornerRadius'] = original['cornerRadius'];
+  copy['cornerSmoothing'] = original['cornerSmoothing'];
+  copy['dashPattern'] = original['dashPattern'];
+  copy['effectStyleId'] = original['effectStyleId'];
+  copy['effects'] = original['effects']; // might be problem
+  copy['exportSettings'] = original['exportSettings'];
+  copy['fillStyleId'] = original['fillStyleId'];
+  copy['fills'] = original['fills'];
+  copy['handleMirroring'] = original['handleMirroring'];
+  // copy['height'] = original['height'];
+  // copy['isMask'] = original['isMask'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  copy['opacity'] = original['opacity'];
+  // copy['relativeTransform'] = original['relativeTransform'];
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  copy['strokeAlign'] = original['strokeAlign'];
+  copy['strokeCap'] = original['strokeCap'];
+  copy['strokeJoin'] = original['strokeJoin'];
+  copy['strokeStyleId'] = original['strokeStyleId'];
+  copy['strokeWeight'] = original['strokeWeight'];
+  copy['strokes'] = original['strokes'];
+  // copy['type'] = original['type'];
+  copy['vectorNetwork'] = original['vectorNetwork'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
 
 }
 
 function copyStarNode(copy, original) {
-
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  copy['blendMode'] = original['blendMode'];
+  copy['constraints'] = original['constraints'];
+  copy['cornerRadius'] = original['cornerRadius'];
+  copy['cornerSmoothing'] = original['cornerSmoothing'];
+  copy['dashPattern'] = original['dashPattern'];
+  copy['effectStyleId'] = original['effectStyleId'];
+  copy['effects'] = original['effects']; // might be problem
+  copy['exportSettings'] = original['exportSettings'];
+  copy['fillStyleId'] = original['fillStyleId'];
+  copy['fills'] = original['fills'];
+  // copy['height'] = original['height'];
+  // copy['innerRadius'] = original['innerRadius'];
+  // copy['isMask'] = original['isMask'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  copy['opacity'] = original['opacity'];
+  // copy['pointCount'] = original['pointCount'];
+  // copy['relativeTransform'] = original['relativeTransform'];
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  copy['strokeAlign'] = original['strokeAlign'];
+  copy['strokeCap'] = original['strokeCap'];
+  copy['strokeJoin'] = original['strokeJoin'];
+  copy['strokeStyleId'] = original['strokeStyleId'];
+  copy['strokeWeight'] = original['strokeWeight'];
+  copy['strokes'] = original['strokes'];
+  // copy['type'] = original['type'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
 }
 
 function copyLineNode(copy, original) {
-
+    // copy['absoluteTransform'] = original['absoluteTransform'];
+  copy['blendMode'] = original['blendMode'];
+  copy['constraints'] = original['constraints'];
+  copy['dashPattern'] = original['dashPattern'];
+  copy['effectStyleId'] = original['effectStyleId'];
+  copy['effects'] = original['effects']; // might be problem
+  copy['exportSettings'] = original['exportSettings'];
+  copy['fillStyleId'] = original['fillStyleId'];
+  copy['fills'] = original['fills'];
+  // copy['height'] = original['height'];
+  // copy['isMask'] = original['isMask'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  copy['opacity'] = original['opacity'];
+  // copy['relativeTransform'] = original['relativeTransform'];
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  copy['strokeAlign'] = original['strokeAlign'];
+  copy['strokeCap'] = original['strokeCap'];
+  copy['strokeJoin'] = original['strokeJoin'];
+  copy['strokeStyleId'] = original['strokeStyleId'];
+  copy['strokeWeight'] = original['strokeWeight'];
+  copy['strokes'] = original['strokes'];
+  // copy['type'] = original['type'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
 }
 
 function copyEllipseNode(copy, original) {
-
+    // copy['absoluteTransform'] = original['absoluteTransform'];
+    // copy['arcData'] = original['arcData'];
+    copy['blendMode'] = original['blendMode'];
+    copy['constraints'] = original['constraints'];
+    // copy['cornerRadius'] = original['cornerRadius'];
+    // copy['cornerSmoothing'] = original['cornerSmoothing'];
+    copy['dashPattern'] = original['dashPattern'];
+    copy['effectStyleId'] = original['effectStyleId'];
+    copy['effects'] = original['effects']; // might be problem
+    copy['exportSettings'] = original['exportSettings'];
+    copy['fillStyleId'] = original['fillStyleId'];
+    copy['fills'] = original['fills'];
+    // copy['height'] = original['height'];
+    // copy['isMask'] = original['isMask'];
+    copy['locked'] = original['locked'];
+    copy['name'] = original['name'];
+    copy['opacity'] = original['opacity'];
+    // copy['relativeTransform'] = original['relativeTransform'];
+    // copy['removed'] = original['removed'];
+    // copy['rotation'] = original['rotation'];
+    copy['strokeAlign'] = original['strokeAlign'];
+    copy['strokeCap'] = original['strokeCap'];
+    copy['strokeJoin'] = original['strokeJoin'];
+    copy['strokeStyleId'] = original['strokeStyleId'];
+    copy['strokeWeight'] = original['strokeWeight'];
+    copy['strokes'] = original['strokes'];
+    // copy['type'] = original['type'];
+    copy['visible'] = original['visible'];
+    // copy['width'] = original['width'];
+    // copy['x'] = original['x'];
+    // copy['y'] = original['y'];
 }
 
 function copyPolygonNode(copy, original) {
-
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  copy['blendMode'] = original['blendMode'];
+  copy['constraints'] = original['constraints'];
+  // copy['cornerRadius'] = original['cornerRadius'];
+  // copy['cornerSmoothing'] = original['cornerSmoothing'];
+  copy['dashPattern'] = original['dashPattern'];
+  copy['effectStyleId'] = original['effectStyleId'];
+  copy['effects'] = original['effects']; // might be problem
+  copy['exportSettings'] = original['exportSettings'];
+  copy['fillStyleId'] = original['fillStyleId'];
+  copy['fills'] = original['fills'];
+  // copy['height'] = original['height'];
+  // copy['isMask'] = original['isMask'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  copy['opacity'] = original['opacity'];
+  // copy['relativeTransform'] = original['relativeTransform'];
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  copy['strokeAlign'] = original['strokeAlign'];
+  copy['strokeCap'] = original['strokeCap'];
+  copy['strokeJoin'] = original['strokeJoin'];
+  copy['strokeStyleId'] = original['strokeStyleId'];
+  copy['strokeWeight'] = original['strokeWeight'];
+  copy['strokes'] = original['strokes'];
+  // copy['type'] = original['type'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
 }
 
 // If nothing selected, exit
@@ -256,6 +417,7 @@ for (const node of figma.currentPage.selection) {
         copyStarNode(newGrandchild, originalGrandchild);
       case 'LineNode':
         console.log('line');
+        console.log(originalGrandchild);
         copyLineNode(newGrandchild, originalGrandchild);
       case 'EllipseNode':
         console.log('ellipse');
@@ -268,9 +430,8 @@ for (const node of figma.currentPage.selection) {
         copyRectangleNode(newGrandchild, originalGrandchild);
         break;
       case 'TextNode':
-        console.log(originalGrandchild);
-        copyTextNode(newGrandchild, originalGrandchild);
         console.log('text');
+        copyTextNode(newGrandchild, originalGrandchild);
         break;
       default:
         console.log('other type, need to add functionality');

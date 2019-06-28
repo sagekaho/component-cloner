@@ -27,19 +27,19 @@ function copyInstanceNode(copy, original) {
   copy['gridStyleId'] = original['gridStyleId'];
   copy['guides'] = original['guides'];
   // copy['height'] = original['height'];
-  copy['isMask'] = original['isMask'];
+  // copy['isMask'] = original['isMask'];
   copy['layoutGrids'] = original['layoutGrids'];
   copy['locked'] = original['locked'];
   copy['name'] = original['name'];
   copy['opacity'] = original['opacity'];
-  copy['relativeTransform'] = original['relativeTransform'];
+  // copy['relativeTransform'] = original['relativeTransform'];
   // copy['removed'] = original['removed'];
-  copy['rotation'] = original['rotation'];
+  // copy['rotation'] = original['rotation'];
   // copy['type'] = original['type'];
   copy['visible'] = original['visible'];
   // copy['width'] = original['width'];
-  copy['x'] = original['x'];
-  copy['y'] = original['y'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
   return;
 }
 
@@ -397,34 +397,45 @@ for (const node of figma.currentPage.selection) {
       case 'SliceNode':
         console.log('slice');
         copySliceNode(newGrandchild, originalGrandchild);
+        break;
       case 'FrameNode':
         console.log('frame');
+        console.log(originalGrandchild);
         copyFrameNode(newGrandchild, originalGrandchild);
+        break;
       case 'ComponentNode':
         console.log('component');
         copyComponentNode(newGrandchild, originalGrandchild);
+        break;
       case 'InstanceNode':
         console.log('instance');
         copyInstanceNode(newGrandchild, originalGrandchild);
+        break;
       case 'BooleanOperationNode':
         console.log('boolean operation');
         copyBooleanOperationNode(newGrandchild, originalGrandchild);
+        break;
       case 'VectorNode':
         console.log('vector');
         copyBooleanOperationNode(newGrandchild, originalGrandchild);
+        break;
       case 'StarNode':
         console.log('star');
         copyStarNode(newGrandchild, originalGrandchild);
+        break;
       case 'LineNode':
         console.log('line');
         console.log(originalGrandchild);
         copyLineNode(newGrandchild, originalGrandchild);
+        break;
       case 'EllipseNode':
         console.log('ellipse');
         copyEllipseNode(newGrandchild, originalGrandchild);
+        break;
       case 'PolygonNode':
         console.log('polygon');
         copyPolygonNode(newGrandchild, originalGrandchild);
+        break;
       case 'RectangleNode':
         console.log('rectangle');
         copyRectangleNode(newGrandchild, originalGrandchild);

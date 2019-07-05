@@ -8,19 +8,11 @@ This will create a new master component with the instances you selected attached
 
 To-do:
 
-Close plugin once last text field has been added DONE
 Test each shape
-Test vector node/redo it
-Add support for nested nodes, groups in particular DONE
-Put master component on same page or nearby if it's too far away from current
-Option to select master component to clone along with its child components
+Think about how to make UI easy to use and understand
 
 Questions?
 Errors when specifying type for node copy functions, way to suppress?
-
-Observation:
-Instance nodes can't be nested - thank goodness
-Prototyping stuff is not considered at all, maybe test it later
 
 */
 /*-----------------------------------------------------------------------------
@@ -34,11 +26,10 @@ function copyFrameNode(copy, original) {
     copy['backgrounds'] = original['backgrounds'];
     copy['backgroundStyleId'] = original['backgroundStyleId'];
     copy['blendMode'] = original['blendMode'];
-    // copy['children'] = original['children'];
     copy['clipsContent'] = original['clipsContent'];
     copy['constraints'] = original['constraints'];
     copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem
+    copy['effects'] = original['effects'];
     copy['exportSettings'] = original['exportSettings'];
     copy['gridStyleId'] = original['gridStyleId'];
     copy['guides'] = original['guides'];
@@ -57,7 +48,6 @@ function copyFrameNode(copy, original) {
     // Copy each child
     var currentChild = 0;
     original['children'].forEach(function (childNode) {
-        console.log(childNode);
         copyNodesBasedOnType(copy['children'][currentChild++], childNode);
     });
 }
@@ -129,6 +119,11 @@ function copyBooleanOperationNode(copy, original) {
     // copy['width'] = original['width'];
     // copy['x'] = original['x'];
     // copy['y'] = original['y'];
+    // Copy each child
+    var currentChild = 0;
+    original['children'].forEach(function (childNode) {
+        copyNodesBasedOnType(copy['children'][currentChild++], childNode);
+    });
     return;
 }
 function copyStarNode(copy, original) {
@@ -315,8 +310,8 @@ function copyTextNode(copy, original) {
         copy['textDecoration'] = original['textDecoration'];
         copy['textStyleId'] = original['textStyleId'];
     })["catch"](function (err) {
-        console.log("function copyTextNode() error: promise failed");
-        console.log(err);
+        console.error("Clone plugin error: function copyTextNode() error: promise failed");
+        console.error(err);
     });
     // copy['absoluteTransform'] = original['absoluteTransform'];
     copy['autoRename'] = original['autoRename'];
@@ -407,7 +402,7 @@ OTHER HELPER FUNCTIONS
 -----------------------------------------------------------------------------*/
 // Prints the error and exits plugin
 function selectionError(errorMsg) {
-    console.log(errorMsg);
+    console.error('Clone PluginError:' + errorMsg);
     figma.closePlugin();
 }
 function verifyUserInput(currentPageSelection) {
@@ -446,7 +441,7 @@ function verifyUserInput(currentPageSelection) {
     }
 }
 function copyNodesBasedOnType(copy, original) {
-    console.log(original.type);
+    // console.log(original.type);
     switch (original.type) {
         case 'SLICE':
             copySliceNode(copy, original);
@@ -483,7 +478,7 @@ function copyNodesBasedOnType(copy, original) {
             copyTextNode(copy, original);
             break;
         default:
-            console.log('Some other node type, need to add functionality');
+            console.error('Some other node type, need to add functionality');
     }
 }
 /*-----------------------------------------------------------------------------

@@ -8,7 +8,7 @@ This will create a new master component with the instances you selected attached
 
 To-do:
 
-Close plugin once last text field has been added
+Close plugin once last text field has been added DONE
 Test each shape
 Test vector node/redo it
 Add support for nested nodes
@@ -70,7 +70,7 @@ function copyTextNode(copy, original) {
       copy['textDecoration'] = original['textDecoration'];
       copy['textStyleId'] = original['textStyleId'];
   }).catch(err => {
-    console.log("function copyTextNode() error: promist failed");
+    console.log("function copyTextNode() error: promise failed");
     console.log(err)
   });
 
@@ -398,26 +398,29 @@ if (figma.currentPage.selection.length < 1) {
   selectionError('Nothing currently selected by user on this page');
 }
 
-// Verify user selection of component instances
+// Verify user selection of component instances, return errors if incorrect
 for (const node of figma.currentPage.selection) {
 
-  // Ensure that the node is of type instance
+  // Ensure that the each node is of type instance, exit if not
   if (node.type != 'INSTANCE') {
     selectionError('Selected nodes are not component instances');
   }
+
+  // Specify the node type so no other errors occur
+  let instanceNode: InstanceNode = node;
 
   // Ensure that each selected element has the same master
   if (master == null) {
     // Sets the master component on the first loop
     if (firstCheck) {
-      master = node.masterComponent;
+      master = instanceNode.masterComponent;
       firstCheck = false;
     } else {
       selectionError('Error: master was not assigned on first iteration');
     }
   } else {
     // Check that nodes have the same master
-    if (master !== node.masterComponent) {
+    if (master !== instanceNode.masterComponent) {
       selectionError('Selected nodes have different master components');
     }
   }
@@ -426,35 +429,30 @@ for (const node of figma.currentPage.selection) {
 
 // Now that everything is set, create a new master component
 let newMaster: ComponentNode = master.clone();
-// console.log(newMaster);
 
-
-let i = 0;
-let lastTextNodeIndex = -1; // Last text node iterated through
-
-let children = [];
+let children = []; // Holds all newly cloned child instances
 
 // Create the new child components
 for (const node of figma.currentPage.selection) {
 
-  // Create another instance of the master (that's how clone works)
-  let newChild: InstanceNode = node.clone();
+  // Specify the node type so no other errors occur
+  let instanceNode: InstanceNode = node;
 
-  // console.log('On node '+i);
+  // Create another instance of the node you want
+  // This creates an exact copy of the master component
+  // What we want is the copy of the last instance so this isn't enough
+  let newChild: InstanceNode = instanceNode.clone();
 
   // Set the master of the new instance to the new one
   newChild.masterComponent = newMaster;
 
-  // console.log(node);
-  // console.log(node.children);
+  // Copies the base instance node information, without considering its children
+  copyInstanceNode(newChild, instanceNode);
 
-  copyInstanceNode(newChild, node);
-
-  // Copy elements of cloned instance (text, images, etc) into that new child
-
-  let k;
-  for(k = 0; k < node.children.length; k++) {
-    let originalGrandchild = node.children[k];
+  // Iterates and copies base instance children information
+  // Children have different types of nodes so we have to consider each possible type
+  for(let k = 0; k < instanceNode.children.length; k++) {
+    let originalGrandchild = instanceNode.children[k];
     let newGrandchild = newChild.children[k];
     switch (originalGrandchild.constructor.name) {
       case 'SliceNode':
@@ -506,8 +504,6 @@ for (const node of figma.currentPage.selection) {
       default:
         console.log('other type, need to add functionality');
     }
-
-    i++;
 
   }
 

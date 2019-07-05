@@ -16,7 +16,7 @@ Put master component on same page or nearby if it's too far away from current
 Option to select master component to clone along with its child components
 
 Questions?
-Why can't I modify height
+Errors when specifying type for node copy functions, way to suppress?
 
 Observation:
 Instance nodes can't be nested - thank goodness
@@ -29,10 +29,7 @@ NODE COPYING FUNCTIONS
 The following are helper function that copy different Node types needed for this
 application from the original instances
 -----------------------------------------------------------------------------*/
-// Also includes group, which needs to be recursive or iterative through children
 function copyFrameNode(copy, original) {
-    // console.log(original);
-    // console.log(original);
     // copy['absoluteTransform'] = original['absoluteTransform'];
     copy['backgrounds'] = original['backgrounds'];
     copy['backgroundStyleId'] = original['backgroundStyleId'];
@@ -395,6 +392,11 @@ function copyInstanceNode(copy, original) {
     // copy['width'] = original['width'];
     // copy['x'] = original['x'];
     // copy['y'] = original['y'];
+    // Copy each child
+    var currentChild = 0;
+    original['children'].forEach(function (childNode) {
+        copyNodesBasedOnType(copy['children'][currentChild++], childNode);
+    });
     return;
 }
 /*-----------------------------------------------------------------------------
@@ -410,6 +412,7 @@ function selectionError(errorMsg) {
 }
 function verifyUserInput(currentPageSelection) {
     var currentInstanceNode;
+    var masterComponentFound = false;
     // If nothing selected, exit
     if (currentPageSelection.length < 1) {
         selectionError('Nothing currently selected by user on this page');
@@ -493,31 +496,26 @@ START OF MAIN PLUGIN CODE
 var originalMasterComponent; // Master component to clone
 var newMasterComponent; // Copy of the original master component
 var currentInstanceNode; // Current node in loop, used to suppress errors
-var newChildNodes = []; // Holds all newly cloned child instances
-var masterComponentFound = false;
+var newInstanceNodes = []; // Holds all newly cloned child instances 
 // Verifies that users selected the right thing, needs refactoring after UI
 verifyUserInput(figma.currentPage.selection);
 newMasterComponent = originalMasterComponent.clone();
-// Loop through the selected components
+// Loops through each selected instance and copies data
 for (var _i = 0, _a = figma.currentPage.selection; _i < _a.length; _i++) {
     var node = _a[_i];
-    // Specify the node type so no other errors occur
-    var instanceNode = node;
-    // Create another instance of the node you want
-    var newChild = instanceNode.clone();
-    // Set the master of the new instance to the new one
-    newChild.masterComponent = newMasterComponent;
-    // Copies the base instance node information, without considering its children
-    copyInstanceNode(newChild, instanceNode);
-    // Iterates and copies base instance children information
-    for (var k = 0; k < instanceNode.children.length; k++) {
-        copyNodesBasedOnType(newChild.children[k], instanceNode.children[k]);
-    }
-    newChildNodes.push(newChild);
+    // Make a new instance of the original node where the copied data will lay
+    var originalInstanceNode = node; // Suppress some type errors
+    var instanceNodeCopy = originalInstanceNode.clone();
+    // Set the master of the new instance to the newly created one
+    instanceNodeCopy.masterComponent = newMasterComponent;
+    // Copies all the original data of the node into the new one
+    copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
+    // Add it to our array so we can select it by default later
+    newInstanceNodes.push(instanceNodeCopy);
 }
 // Automatically selects the newly created master and child nodes
 // FUTURE: Move the master near the child nodes by default
-figma.currentPage.selection = [newMasterComponent].concat(newChildNodes);
+figma.currentPage.selection = [newMasterComponent].concat(newInstanceNodes);
 // Make sure to close the plugin when you're done. Otherwise the plugin will
 // keep running, which shows the cancel button at the bottom of the screen.
 figma.closePlugin();

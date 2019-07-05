@@ -16,7 +16,7 @@ Put master component on same page or nearby if it's too far away from current
 Option to select master component to clone along with its child components
 
 Questions?
-Why can't I modify height
+Errors when specifying type for node copy functions, way to suppress?
 
 Observation:
 Instance nodes can't be nested - thank goodness
@@ -31,10 +31,7 @@ The following are helper function that copy different Node types needed for this
 application from the original instances
 -----------------------------------------------------------------------------*/
 
-// Also includes group, which needs to be recursive or iterative through children
 function copyFrameNode(copy, original) {
-  // console.log(original);
-  // console.log(original);
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['backgrounds'] = original['backgrounds'];
   copy['backgroundStyleId'] = original['backgroundStyleId'];
@@ -411,6 +408,11 @@ function copyInstanceNode(copy, original) {
   // copy['width'] = original['width'];
   // copy['x'] = original['x'];
   // copy['y'] = original['y'];
+  // Copy each child
+  let currentChild = 0;
+  original['children'].forEach(childNode => {
+    copyNodesBasedOnType(copy['children'][currentChild++], childNode);
+  });
   return;
 }
 
@@ -430,6 +432,7 @@ function selectionError(errorMsg: string) {
 
 function verifyUserInput(currentPageSelection: PageNode['selection']) {
   let currentInstanceNode: InstanceNode;
+  let masterComponentFound: Boolean = false;
 
   // If nothing selected, exit
   if (currentPageSelection.length < 1) {
@@ -466,7 +469,7 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
   }
 }
 
-function copyNodesBasedOnType(copy, original) {
+function copyNodesBasedOnType(copy: BaseNode, original: BaseNode) {
   console.log(original.type);
   switch (original.type) {
     case 'SLICE':
@@ -521,40 +524,33 @@ START OF MAIN PLUGIN CODE
 let originalMasterComponent: ComponentNode; // Master component to clone
 let newMasterComponent: ComponentNode; // Copy of the original master component
 let currentInstanceNode: InstanceNode; // Current node in loop, used to suppress errors
-let newChildNodes: BaseNode[] = []; // Holds all newly cloned child instances
-let masterComponentFound: Boolean = false; 
+let newInstanceNodes: BaseNode[] = []; // Holds all newly cloned child instances 
 
 // Verifies that users selected the right thing, needs refactoring after UI
 verifyUserInput(figma.currentPage.selection);
 
 newMasterComponent = originalMasterComponent.clone();
 
-// Loop through the selected components
+// Loops through each selected instance and copies data
 for (const node of figma.currentPage.selection) {
 
-  // Specify the node type so no other errors occur
-  let instanceNode: InstanceNode = node;
+  // Make a new instance of the original node where the copied data will lay
+  let originalInstanceNode: InstanceNode = node; // Suppress some type errors
+  let instanceNodeCopy: InstanceNode = originalInstanceNode.clone();
 
-  // Create another instance of the node you want
-  let newChild: InstanceNode = instanceNode.clone();
+  // Set the master of the new instance to the newly created one
+  instanceNodeCopy.masterComponent = newMasterComponent;
 
-  // Set the master of the new instance to the new one
-  newChild.masterComponent = newMasterComponent;
+  // Copies all the original data of the node into the new one
+  copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
 
-  // Copies the base instance node information, without considering its children
-  copyInstanceNode(newChild, instanceNode);
-
-  // Iterates and copies base instance children information
-  for(let k = 0; k < instanceNode.children.length; k++) {
-    copyNodesBasedOnType(newChild.children[k], instanceNode.children[k]);
-  }
-
-  newChildNodes.push(newChild);
+  // Add it to our array so we can select it by default later
+  newInstanceNodes.push(instanceNodeCopy);
 }
 
 // Automatically selects the newly created master and child nodes
 // FUTURE: Move the master near the child nodes by default
-figma.currentPage.selection = [newMasterComponent, ...newChildNodes];
+figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
 
 // Make sure to close the plugin when you're done. Otherwise the plugin will
 // keep running, which shows the cancel button at the bottom of the screen.

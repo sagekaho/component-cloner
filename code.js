@@ -15,6 +15,9 @@ Add support for nested nodes
 Put master component on same page or nearby if it's too far away from current
 Option to select master component to clone along with its child components
 
+Questions?
+Why can't I modify height
+
 */
 var master; // The master component to clone
 var firstCheck = true; // Tracks first iteration through selected nodes
@@ -24,11 +27,13 @@ function selectionError(errorMsg) {
     figma.closePlugin();
 }
 function copyInstanceNode(copy, original) {
+    // copy['absoluteTransform'] = original['absoluteTransform'];
+    copy['backgroundStyleId'] = original['backgroundStyleId'];
     copy['backgrounds'] = original['backgrounds'];
     copy['blendMode'] = original['blendMode'];
     copy['clipsContent'] = original['clipsContent'];
     copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem cause ID??
+    copy['effects'] = original['effects'];
     copy['exportSettings'] = original['exportSettings'];
     copy['gridStyleId'] = original['gridStyleId'];
     copy['guides'] = original['guides'];
@@ -38,7 +43,8 @@ function copyInstanceNode(copy, original) {
     copy['locked'] = original['locked'];
     copy['name'] = original['name'];
     copy['opacity'] = original['opacity'];
-    // copy['relativeTransform'] = original['relativeTransform'];
+    // copy['parent'] = original['parent'];
+    copy['relativeTransform'] = original['relativeTransform'];
     // copy['removed'] = original['removed'];
     // copy['rotation'] = original['rotation'];
     // copy['type'] = original['type'];
@@ -49,6 +55,10 @@ function copyInstanceNode(copy, original) {
     return;
 }
 function copyTextNode(copy, original) {
+    // Can't change height width, x, y, constraints anyways so those don't matter
+    // Also alignment
+    // Doesn't support features
+    console.log(original);
     // Load original and new font then modify once complete
     Promise.all([figma.loadFontAsync(copy['fontName']), figma.loadFontAsync(original['fontName'])])
         .then(function () {
@@ -483,9 +493,9 @@ for (var _b = 0, _c = figma.currentPage.selection; _b < _c.length; _b++) {
     }
     children.push(newChild);
 }
-// console.log(children);
+// Automatically selects the newly created master and child nodes
+// FUTURE: Move the master near the child nodes by default
 figma.currentPage.selection = [newMaster].concat(children);
-// console.log(figma.currentPage.selection);
 // Make sure to close the plugin when you're done. Otherwise the plugin will
 // keep running, which shows the cancel button at the bottom of the screen.
-figma.closePlugin();
+// figma.closePlugin();

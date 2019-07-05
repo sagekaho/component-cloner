@@ -11,168 +11,30 @@ To-do:
 Close plugin once last text field has been added DONE
 Test each shape
 Test vector node/redo it
-Add support for nested nodes
+Add support for nested nodes, groups in particular DONE
 Put master component on same page or nearby if it's too far away from current
 Option to select master component to clone along with its child components
 
 Questions?
 Why can't I modify height
 
+Observation:
+Instance nodes can't be nested - thank goodness
+Prototyping stuff is not considered at all, maybe test it later
+
 */
 
-let master: ComponentNode; // The master component to clone
-let firstCheck: Boolean = true; // Tracks first iteration through selected nodes
+/*-----------------------------------------------------------------------------
+NODE COPYING FUNCTIONS
+-------------------------------------------------------------------------------
+The following are helper function that copy different Node types needed for this 
+application from the original instances
+-----------------------------------------------------------------------------*/
 
-// Prints the error and exits
-function selectionError(errorMsg: string) {
-  console.log(errorMsg);
-  figma.closePlugin();
-}
-
-function copyInstanceNode(copy, original) {
-  // copy['absoluteTransform'] = original['absoluteTransform'];
-  copy['backgroundStyleId'] = original['backgroundStyleId'];
-  copy['backgrounds'] = original['backgrounds'];
-  copy['blendMode'] = original['blendMode'];
-  copy['clipsContent'] = original['clipsContent'];
-  copy['effectStyleId'] = original['effectStyleId'];
-  copy['effects'] = original['effects'];
-  copy['exportSettings'] = original['exportSettings'];
-  copy['gridStyleId'] = original['gridStyleId'];
-  copy['guides'] = original['guides'];
-  // copy['height'] = original['height'];
-  // copy['isMask'] = original['isMask'];
-  copy['layoutGrids'] = original['layoutGrids'];
-  copy['locked'] = original['locked'];
-  copy['name'] = original['name'];
-  copy['opacity'] = original['opacity'];
-  // copy['parent'] = original['parent'];
-  copy['relativeTransform'] = original['relativeTransform'];
-  // copy['removed'] = original['removed'];
-  // copy['rotation'] = original['rotation'];
-  // copy['type'] = original['type'];
-  copy['visible'] = original['visible'];
-  // copy['width'] = original['width'];
-  // copy['x'] = original['x'];
-  // copy['y'] = original['y'];
-  return;
-}
-
-function copyTextNode(copy, original) {
-  // Can't change height width, x, y, constraints anyways so those don't matter
-  // Also alignment
-  // Doesn't support features
-
-
-  console.log(original);
-  // Load original and new font then modify once complete
-  Promise.all([figma.loadFontAsync(copy['fontName']), figma.loadFontAsync(original['fontName'])])
-  .then(() => {
-      copy['characters'] = original['characters'];
-      copy['fontName'] = original['fontName'];
-      copy['fontSize'] = original['fontSize'];
-      copy['letterSpacing'] = original['letterSpacing'];
-      copy['lineHeight'] = original['lineHeight'];
-      copy['paragraphIndent'] = original['paragraphIndent'];
-      copy['paragraphSpacing'] = original['paragraphSpacing'];
-      copy['textAlignHorizontal'] = original['textAlignHorizontal'];
-      copy['textAlignVertical'] = original['textAlignVertical'];
-      copy['textAutoResize'] = original['textAutoResize'];
-      copy['textCase'] = original['textCase'];
-      copy['textDecoration'] = original['textDecoration'];
-      copy['textStyleId'] = original['textStyleId'];
-  }).catch(err => {
-    console.log("function copyTextNode() error: promise failed");
-    console.log(err)
-  });
-
-  // copy['absoluteTransform'] = original['absoluteTransform'];
-  copy['autoRename'] = original['autoRename'];
-  copy['blendMode'] = original['blendMode'];
-  copy['constraints'] = original['constraints'];
-  copy['dashPattern'] = original['dashPattern'];
-  copy['effectStyleId'] = original['effectStyleId'];
-  copy['effects'] = original['effects']; // might be problem
-  copy['exportSettings'] = original['exportSettings'];
-  copy['fillStyleId'] = original['fillStyleId'];
-  copy['fills'] = original['fills'];
-  // copy['height'] = original['height'];
-  // copy['isMask'] = original['isMask'];
-  copy['locked'] = original['locked'];
-  copy['name'] = original['name'];
-  copy['opacity'] = original['opacity'];
-  // copy['parent'] = original['parent'];
-  // copy['relativeTransform'] = original['relativeTransform'];
-  // copy['removed'] = original['removed'];
-  // copy['rotation'] = original['rotation'];
-  copy['strokeAlign'] = original['strokeAlign'];
-  copy['strokeCap'] = original['strokeCap'];
-  copy['strokeJoin'] = original['strokeJoin'];
-  copy['strokeStyleId'] = original['strokeStyleId'];
-  copy['strokeWeight'] = original['strokeWeight'];
-  copy['strokes'] = original['strokes'];
-  // copy['type'] = original['type'];
-  copy['visible'] = original['visible'];
-  // copy['width'] = original['width'];
-  // copy['x'] = original['x'];
-  // copy['y'] = original['y'];
-  return;
-}
-
-function copyRectangleNode(copy, original) {
-  // copy['absoluteTransform'] = original['absoluteTransform'];
-  // copy['backgrounds'] = original['backgrounds'];
-  copy['blendMode'] = original['blendMode'];
-  // copy['bottomLeftRadius'] = original['bottomLeftRadius'];
-  // copy['bottomRightRadius'] = original['bottomRightRadius'];
-  copy['constraints'] = original['constraints'];
-  // copy['cornerRadius'] = original['cornerRadius'];
-  // copy['cornerSmoothing'] = original['cornerSmoothing'];
-  copy['dashPattern'] = original['dashPattern'];
-  copy['effectStyleId'] = original['effectStyleId'];
-  copy['effects'] = original['effects']; // might be problem
-  copy['exportSettings'] = original['exportSettings'];
-  copy['fillStyleId'] = original['fillStyleId'];
-  copy['fills'] = original['fills'];
-  // copy['height'] = original['height'];
-  // copy['isMask'] = original['isMask'];
-  copy['locked'] = original['locked'];
-  copy['name'] = original['name'];
-  copy['opacity'] = original['opacity'];
-  // copy['relativeTransform'] = original['relativeTransform'];
-  // copy['removed'] = original['removed'];
-  // copy['rotation'] = original['rotation'];
-  copy['strokeAlign'] = original['strokeAlign'];
-  copy['strokeCap'] = original['strokeCap'];
-  copy['strokeJoin'] = original['strokeJoin'];
-  copy['strokeStyleId'] = original['strokeStyleId'];
-  copy['strokeWeight'] = original['strokeWeight'];
-  copy['strokes'] = original['strokes'];
-  // copy['type'] = original['type'];
-  copy['visible'] = original['visible'];
-  // copy['width'] = original['width'];
-  // copy['x'] = original['x'];
-  // copy['y'] = original['y'];
-  return;
-}
-function copySliceNode(copy, original) {
-  // copy['absoluteTransform'] = original['absoluteTransform'];
-  copy['constraints'] = original['constraints'];
-  copy['exportSettings'] = original['exportSettings'];
-  // copy['height'] = original['height'];
-  copy['locked'] = original['locked'];
-  copy['name'] = original['name'];
-  // copy['relativeTransform'] = original['relativeTransform'];
-  // copy['removed'] = original['removed'];
-  // copy['rotation'] = original['rotation'];
-  copy['visible'] = original['visible'];
-  // copy['width'] = original['width'];
-  // copy['x'] = original['x'];
-  // copy['y'] = original['y'];
-  return;
-}
-
+// Also includes group, which needs to be recursive or iterative through children
 function copyFrameNode(copy, original) {
+  // console.log(original);
+  // console.log(original);
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['backgrounds'] = original['backgrounds'];
   copy['backgroundStyleId'] = original['backgroundStyleId'];
@@ -197,6 +59,49 @@ function copyFrameNode(copy, original) {
   // copy['width'] = original['width'];
   // copy['x'] = original['x'];
   // copy['y'] = original['y'];
+
+  // Copy each child
+  let currentChild = 0;
+  original['children'].forEach(childNode => {
+    console.log(childNode);
+    copyNodesBasedOnType(copy['children'][currentChild++], childNode);
+  });
+}
+
+function copyVectorNode(copy, original) {
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  copy['blendMode'] = original['blendMode'];
+  copy['constraints'] = original['constraints'];
+  copy['cornerRadius'] = original['cornerRadius'];
+  copy['cornerSmoothing'] = original['cornerSmoothing'];
+  copy['dashPattern'] = original['dashPattern'];
+  copy['effectStyleId'] = original['effectStyleId'];
+  copy['effects'] = original['effects']; // might be problem
+  copy['exportSettings'] = original['exportSettings'];
+  copy['fillStyleId'] = original['fillStyleId'];
+  copy['fills'] = original['fills'];
+  copy['handleMirroring'] = original['handleMirroring'];
+  // copy['height'] = original['height'];
+  // copy['isMask'] = original['isMask'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  copy['opacity'] = original['opacity'];
+  // copy['relativeTransform'] = original['relativeTransform'];
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  copy['strokeAlign'] = original['strokeAlign'];
+  copy['strokeCap'] = original['strokeCap'];
+  copy['strokeJoin'] = original['strokeJoin'];
+  copy['strokeStyleId'] = original['strokeStyleId'];
+  copy['strokeWeight'] = original['strokeWeight'];
+  copy['strokes'] = original['strokes'];
+  // copy['type'] = original['type'];
+  copy['vectorNetwork'] = original['vectorNetwork'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
+
 }
 
 function copyBooleanOperationNode(copy, original) {
@@ -236,42 +141,6 @@ function copyBooleanOperationNode(copy, original) {
   return;
 }
 
-function copyVectorNode(copy, original) {
-  // copy['absoluteTransform'] = original['absoluteTransform'];
-  copy['blendMode'] = original['blendMode'];
-  copy['constraints'] = original['constraints'];
-  copy['cornerRadius'] = original['cornerRadius'];
-  copy['cornerSmoothing'] = original['cornerSmoothing'];
-  copy['dashPattern'] = original['dashPattern'];
-  copy['effectStyleId'] = original['effectStyleId'];
-  copy['effects'] = original['effects']; // might be problem
-  copy['exportSettings'] = original['exportSettings'];
-  copy['fillStyleId'] = original['fillStyleId'];
-  copy['fills'] = original['fills'];
-  copy['handleMirroring'] = original['handleMirroring'];
-  // copy['height'] = original['height'];
-  // copy['isMask'] = original['isMask'];
-  copy['locked'] = original['locked'];
-  copy['name'] = original['name'];
-  copy['opacity'] = original['opacity'];
-  // copy['relativeTransform'] = original['relativeTransform'];
-  // copy['removed'] = original['removed'];
-  // copy['rotation'] = original['rotation'];
-  copy['strokeAlign'] = original['strokeAlign'];
-  copy['strokeCap'] = original['strokeCap'];
-  copy['strokeJoin'] = original['strokeJoin'];
-  copy['strokeStyleId'] = original['strokeStyleId'];
-  copy['strokeWeight'] = original['strokeWeight'];
-  copy['strokes'] = original['strokes'];
-  // copy['type'] = original['type'];
-  copy['vectorNetwork'] = original['vectorNetwork'];
-  copy['visible'] = original['visible'];
-  // copy['width'] = original['width'];
-  // copy['x'] = original['x'];
-  // copy['y'] = original['y'];
-
-}
-
 function copyStarNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['blendMode'] = original['blendMode'];
@@ -308,9 +177,43 @@ function copyStarNode(copy, original) {
 }
 
 function copyLineNode(copy, original) {
-    // copy['absoluteTransform'] = original['absoluteTransform'];
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+copy['blendMode'] = original['blendMode'];
+copy['constraints'] = original['constraints'];
+copy['dashPattern'] = original['dashPattern'];
+copy['effectStyleId'] = original['effectStyleId'];
+copy['effects'] = original['effects']; // might be problem
+copy['exportSettings'] = original['exportSettings'];
+copy['fillStyleId'] = original['fillStyleId'];
+copy['fills'] = original['fills'];
+// copy['height'] = original['height'];
+// copy['isMask'] = original['isMask'];
+copy['locked'] = original['locked'];
+copy['name'] = original['name'];
+copy['opacity'] = original['opacity'];
+// copy['relativeTransform'] = original['relativeTransform'];
+// copy['removed'] = original['removed'];
+// copy['rotation'] = original['rotation'];
+copy['strokeAlign'] = original['strokeAlign'];
+copy['strokeCap'] = original['strokeCap'];
+copy['strokeJoin'] = original['strokeJoin'];
+copy['strokeStyleId'] = original['strokeStyleId'];
+copy['strokeWeight'] = original['strokeWeight'];
+copy['strokes'] = original['strokes'];
+// copy['type'] = original['type'];
+copy['visible'] = original['visible'];
+// copy['width'] = original['width'];
+// copy['x'] = original['x'];
+// copy['y'] = original['y'];
+}
+
+function copyEllipseNode(copy, original) {
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  // copy['arcData'] = original['arcData'];
   copy['blendMode'] = original['blendMode'];
   copy['constraints'] = original['constraints'];
+  // copy['cornerRadius'] = original['cornerRadius'];
+  // copy['cornerSmoothing'] = original['cornerSmoothing'];
   copy['dashPattern'] = original['dashPattern'];
   copy['effectStyleId'] = original['effectStyleId'];
   copy['effects'] = original['effects']; // might be problem
@@ -336,40 +239,6 @@ function copyLineNode(copy, original) {
   // copy['width'] = original['width'];
   // copy['x'] = original['x'];
   // copy['y'] = original['y'];
-}
-
-function copyEllipseNode(copy, original) {
-    // copy['absoluteTransform'] = original['absoluteTransform'];
-    // copy['arcData'] = original['arcData'];
-    copy['blendMode'] = original['blendMode'];
-    copy['constraints'] = original['constraints'];
-    // copy['cornerRadius'] = original['cornerRadius'];
-    // copy['cornerSmoothing'] = original['cornerSmoothing'];
-    copy['dashPattern'] = original['dashPattern'];
-    copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem
-    copy['exportSettings'] = original['exportSettings'];
-    copy['fillStyleId'] = original['fillStyleId'];
-    copy['fills'] = original['fills'];
-    // copy['height'] = original['height'];
-    // copy['isMask'] = original['isMask'];
-    copy['locked'] = original['locked'];
-    copy['name'] = original['name'];
-    copy['opacity'] = original['opacity'];
-    // copy['relativeTransform'] = original['relativeTransform'];
-    // copy['removed'] = original['removed'];
-    // copy['rotation'] = original['rotation'];
-    copy['strokeAlign'] = original['strokeAlign'];
-    copy['strokeCap'] = original['strokeCap'];
-    copy['strokeJoin'] = original['strokeJoin'];
-    copy['strokeStyleId'] = original['strokeStyleId'];
-    copy['strokeWeight'] = original['strokeWeight'];
-    copy['strokes'] = original['strokes'];
-    // copy['type'] = original['type'];
-    copy['visible'] = original['visible'];
-    // copy['width'] = original['width'];
-    // copy['x'] = original['x'];
-    // copy['y'] = original['y'];
 }
 
 function copyPolygonNode(copy, original) {
@@ -405,127 +274,288 @@ function copyPolygonNode(copy, original) {
   // copy['y'] = original['y'];
 }
 
-// If nothing selected, exit
-if (figma.currentPage.selection.length < 1) {
-  selectionError('Nothing currently selected by user on this page');
+function copyRectangleNode(copy, original) {
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  // copy['backgrounds'] = original['backgrounds'];
+  copy['blendMode'] = original['blendMode'];
+  // copy['bottomLeftRadius'] = original['bottomLeftRadius'];
+  // copy['bottomRightRadius'] = original['bottomRightRadius'];
+  copy['constraints'] = original['constraints'];
+  // copy['cornerRadius'] = original['cornerRadius'];
+  // copy['cornerSmoothing'] = original['cornerSmoothing'];
+  copy['dashPattern'] = original['dashPattern'];
+  copy['effectStyleId'] = original['effectStyleId'];
+  copy['effects'] = original['effects']; // might be problem
+  copy['exportSettings'] = original['exportSettings'];
+  copy['fillStyleId'] = original['fillStyleId'];
+  copy['fills'] = original['fills'];
+  // copy['height'] = original['height'];
+  // copy['isMask'] = original['isMask'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  copy['opacity'] = original['opacity'];
+  // copy['relativeTransform'] = original['relativeTransform'];
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  copy['strokeAlign'] = original['strokeAlign'];
+  copy['strokeCap'] = original['strokeCap'];
+  copy['strokeJoin'] = original['strokeJoin'];
+  copy['strokeStyleId'] = original['strokeStyleId'];
+  copy['strokeWeight'] = original['strokeWeight'];
+  copy['strokes'] = original['strokes'];
+  // copy['type'] = original['type'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
+  return;
 }
 
-// Verify user selection of component instances, return errors if incorrect
-for (const node of figma.currentPage.selection) {
+function copyTextNode(copy, original) {
+  // Doesn't support Advanced Type Features, Numbers
 
-  // Ensure that the each node is of type instance, exit if not
-  if (node.type != 'INSTANCE') {
-    selectionError('Selected nodes are not component instances');
+  // Load original and new font then modify once complete
+  Promise.all([figma.loadFontAsync(copy['fontName']), figma.loadFontAsync(original['fontName'])])
+  .then(() => {
+      copy['characters'] = original['characters'];
+      copy['fontName'] = original['fontName'];
+      copy['fontSize'] = original['fontSize'];
+      copy['letterSpacing'] = original['letterSpacing'];
+      copy['lineHeight'] = original['lineHeight'];
+      copy['paragraphIndent'] = original['paragraphIndent'];
+      copy['paragraphSpacing'] = original['paragraphSpacing'];
+      copy['textAlignHorizontal'] = original['textAlignHorizontal'];
+      copy['textAlignVertical'] = original['textAlignVertical'];
+      copy['textAutoResize'] = original['textAutoResize'];
+      copy['textCase'] = original['textCase'];
+      copy['textDecoration'] = original['textDecoration'];
+      copy['textStyleId'] = original['textStyleId'];
+  }).catch((err) => {
+    console.log("function copyTextNode() error: promise failed");
+    console.log(err)
+  });
+
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  copy['autoRename'] = original['autoRename'];
+  copy['blendMode'] = original['blendMode'];
+  copy['constraints'] = original['constraints'];
+  copy['dashPattern'] = original['dashPattern'];
+  copy['effectStyleId'] = original['effectStyleId'];
+  copy['effects'] = original['effects'];
+  copy['exportSettings'] = original['exportSettings'];
+  copy['fillStyleId'] = original['fillStyleId'];
+  copy['fills'] = original['fills'];
+  // copy['height'] = original['height'];
+  // copy['isMask'] = original['isMask'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  copy['opacity'] = original['opacity'];
+  // copy['parent'] = original['parent'];
+  // copy['relativeTransform'] = original['relativeTransform'];
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  copy['strokeAlign'] = original['strokeAlign'];
+  copy['strokeCap'] = original['strokeCap'];
+  copy['strokeJoin'] = original['strokeJoin'];
+  copy['strokeStyleId'] = original['strokeStyleId'];
+  copy['strokeWeight'] = original['strokeWeight'];
+  copy['strokes'] = original['strokes'];
+  // copy['type'] = original['type'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
+  return;
+}
+
+function copySliceNode(copy, original) {
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  copy['constraints'] = original['constraints'];
+  copy['exportSettings'] = original['exportSettings'];
+  // copy['height'] = original['height'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  // copy['relativeTransform'] = original['relativeTransform'];
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
+  return;
+}
+ 
+function copyInstanceNode(copy, original) {
+  // copy['absoluteTransform'] = original['absoluteTransform'];
+  copy['backgroundStyleId'] = original['backgroundStyleId'];
+  copy['backgrounds'] = original['backgrounds'];
+  copy['blendMode'] = original['blendMode'];
+  copy['clipsContent'] = original['clipsContent'];
+  copy['effectStyleId'] = original['effectStyleId'];
+  copy['effects'] = original['effects'];
+  copy['exportSettings'] = original['exportSettings'];
+  copy['gridStyleId'] = original['gridStyleId'];
+  copy['guides'] = original['guides'];
+  // copy['height'] = original['height'];
+  // copy['isMask'] = original['isMask'];
+  copy['layoutGrids'] = original['layoutGrids'];
+  copy['locked'] = original['locked'];
+  copy['name'] = original['name'];
+  copy['opacity'] = original['opacity'];
+  // copy['parent'] = original['parent'];
+  // copy['relativeTransform'] = original['relativeTransform']; // This varies by base or child
+  // copy['removed'] = original['removed'];
+  // copy['rotation'] = original['rotation'];
+  // copy['type'] = original['type'];
+  copy['visible'] = original['visible'];
+  // copy['width'] = original['width'];
+  // copy['x'] = original['x'];
+  // copy['y'] = original['y'];
+  return;
+}
+
+/*-----------------------------------------------------------------------------
+END OF NODE COPYING FUNCTIONS
+-----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+OTHER HELPER FUNCTIONS
+-----------------------------------------------------------------------------*/
+
+// Prints the error and exits plugin
+function selectionError(errorMsg: string) {
+  console.log(errorMsg);
+  figma.closePlugin();
+}
+
+function verifyUserInput(currentPageSelection: PageNode['selection']) {
+  let currentInstanceNode: InstanceNode;
+
+  // If nothing selected, exit
+  if (currentPageSelection.length < 1) {
+    selectionError('Nothing currently selected by user on this page');
   }
 
-  // Specify the node type so no other errors occur
-  let instanceNode: InstanceNode = node;
+  // Verify user selection of component instances under same master
+  for (const currentNode of currentPageSelection) {
 
-  // Ensure that each selected element has the same master
-  if (master == null) {
-    // Sets the master component on the first loop
-    if (firstCheck) {
-      master = instanceNode.masterComponent;
-      firstCheck = false;
+    // Ensure that the each node is of type instance, exit if not
+    if (currentNode.type != 'INSTANCE') {
+      selectionError('Selected nodes are not component instances');
+    }
+
+    // Specify the node type so no other errors occur
+    currentInstanceNode = currentNode;
+
+
+    // Ensure that each selected element has the same master
+    if (originalMasterComponent == null) {
+      // Sets the master component on the first loop
+      if (!masterComponentFound) {
+        originalMasterComponent = currentInstanceNode.masterComponent;
+        masterComponentFound = true;
+      } else {
+        selectionError('Error: master was not assigned on first iteration');
+      }
     } else {
-      selectionError('Error: master was not assigned on first iteration');
-    }
-  } else {
-    // Check that nodes have the same master
-    if (master !== instanceNode.masterComponent) {
-      selectionError('Selected nodes have different master components');
+      // Check that nodes have the same master
+      if (originalMasterComponent !== currentInstanceNode.masterComponent) {
+        selectionError('Selected nodes have different master components');
+      }
     }
   }
-
 }
 
-// Now that everything is set, create a new master component
-let newMaster: ComponentNode = master.clone();
+function copyNodesBasedOnType(copy, original) {
+  console.log(original.type);
+  switch (original.type) {
+    case 'SLICE':
+      copySliceNode(copy, original);
+      break;
+    case 'FRAME':
+    case 'GROUP':
+      copyFrameNode(copy, original);
+      break;
+    case 'INSTANCE':
+      copyInstanceNode(copy, original);
+      break;
+    case 'BOOLEAN_OPERATION':
+      copyBooleanOperationNode(copy, original);
+      break;
+    case 'VECTOR':
+      copyVectorNode(copy, original);
+      break;
+    case 'STAR':
+      copyStarNode(copy, original);
+      break;
+    case 'LINE':
+      copyLineNode(copy, original);
+      break;
+    case 'ELLIPSE':
+      copyEllipseNode(copy, original);
+      break;
+    case 'POLYGON':
+      copyPolygonNode(copy, original);
+      break;
+    case 'RECTANGLE':
+      copyRectangleNode(copy, original);
+      break;
+    case 'TEXT':
+      copyTextNode(copy, original);
+      break;
+    default:
+      console.log('Some other node type, need to add functionality');
+  }
+}
 
-let children = []; // Holds all newly cloned child instances
+/*-----------------------------------------------------------------------------
+END OF EXTRA HELPER FUNCTIONS
+-----------------------------------------------------------------------------*/
 
-// Create the new child components
+
+/*-----------------------------------------------------------------------------
+START OF MAIN PLUGIN CODE
+-----------------------------------------------------------------------------*/
+
+// Global variables
+let originalMasterComponent: ComponentNode; // Master component to clone
+let newMasterComponent: ComponentNode; // Copy of the original master component
+let currentInstanceNode: InstanceNode; // Current node in loop, used to suppress errors
+let newChildNodes: BaseNode[] = []; // Holds all newly cloned child instances
+let masterComponentFound: Boolean = false; 
+
+// Verifies that users selected the right thing, needs refactoring after UI
+verifyUserInput(figma.currentPage.selection);
+
+newMasterComponent = originalMasterComponent.clone();
+
+// Loop through the selected components
 for (const node of figma.currentPage.selection) {
 
   // Specify the node type so no other errors occur
   let instanceNode: InstanceNode = node;
 
   // Create another instance of the node you want
-  // This creates an exact copy of the master component
-  // What we want is the copy of the last instance so this isn't enough
   let newChild: InstanceNode = instanceNode.clone();
 
   // Set the master of the new instance to the new one
-  newChild.masterComponent = newMaster;
+  newChild.masterComponent = newMasterComponent;
 
   // Copies the base instance node information, without considering its children
   copyInstanceNode(newChild, instanceNode);
 
   // Iterates and copies base instance children information
-  // Children have different types of nodes so we have to consider each possible type
   for(let k = 0; k < instanceNode.children.length; k++) {
-    let originalGrandchild = instanceNode.children[k];
-    let newGrandchild = newChild.children[k];
-    switch (originalGrandchild.constructor.name) {
-      case 'SliceNode':
-        console.log('slice');
-        copySliceNode(newGrandchild, originalGrandchild);
-        break;
-      case 'FrameNode':
-        console.log('frame');
-        console.log(originalGrandchild);
-        copyFrameNode(newGrandchild, originalGrandchild);
-        break;
-      case 'InstanceNode':
-        console.log('instance');
-        copyInstanceNode(newGrandchild, originalGrandchild);
-        break;
-      case 'BooleanOperationNode':
-        console.log('boolean operation');
-        copyBooleanOperationNode(newGrandchild, originalGrandchild);
-        break;
-      case 'VectorNode':
-        console.log('vector');
-        copyVectorNode(newGrandchild, originalGrandchild);
-        break;
-      case 'StarNode':
-        console.log('star');
-        copyStarNode(newGrandchild, originalGrandchild);
-        break;
-      case 'LineNode':
-        console.log('line');
-        // console.log(originalGrandchild);
-        copyLineNode(newGrandchild, originalGrandchild);
-        break;
-      case 'EllipseNode':
-        console.log('ellipse');
-        copyEllipseNode(newGrandchild, originalGrandchild);
-        break;
-      case 'PolygonNode':
-        console.log('polygon');
-        copyPolygonNode(newGrandchild, originalGrandchild);
-        break;
-      case 'RectangleNode':
-        console.log('rectangle');
-        copyRectangleNode(newGrandchild, originalGrandchild);
-        break;
-      case 'TextNode':
-        console.log('text');
-        copyTextNode(newGrandchild, originalGrandchild);
-        break;
-      default:
-        console.log('other type, need to add functionality');
-    }
-
+    copyNodesBasedOnType(newChild.children[k], instanceNode.children[k]);
   }
 
-  children.push(newChild);
+  newChildNodes.push(newChild);
 }
 
 // Automatically selects the newly created master and child nodes
 // FUTURE: Move the master near the child nodes by default
-figma.currentPage.selection = [newMaster, ...children];
+figma.currentPage.selection = [newMasterComponent, ...newChildNodes];
 
 // Make sure to close the plugin when you're done. Otherwise the plugin will
 // keep running, which shows the cancel button at the bottom of the screen.
-// figma.closePlugin();
+figma.closePlugin();

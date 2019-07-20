@@ -1,7 +1,17 @@
-<h2>Rectangle Creator</h2>
+<p>Select child components you want to clone</p>
+
+<p>Name of Master Component <input id="original-master" value=""></p>
+
+
 <p>Count: <input id="count" value="5"></p>
-<button id="create">Create</button>
+
+
+
+<button class="button" id="create">Create</button>
 <button id="cancel">Cancel</button>
+
+
+
 <script>
 
 document.getElementById('create').onclick = () => {
@@ -12,6 +22,13 @@ document.getElementById('create').onclick = () => {
 
 document.getElementById('cancel').onclick = () => {
   parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+}
+
+onmessage = (event) => {
+  console.log("got this from the main code", event.data.pluginMessage);
+  const mastercomponent = document.getElementById('original-master'); 
+  console.log(mastercomponent);
+  mastercomponent.value = event.data.pluginMessage;
 }
 
 </script>

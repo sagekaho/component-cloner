@@ -11,9 +11,6 @@ To-do:
 Test each shape
 Think about how to make UI easy to use and understand
 
-Questions?
-Errors when specifying type for node copy functions, way to suppress?
-
 */
 
 /*-----------------------------------------------------------------------------
@@ -422,11 +419,6 @@ END OF NODE COPYING FUNCTIONS
 OTHER HELPER FUNCTIONS
 -----------------------------------------------------------------------------*/
 
-// Prints the error and exits plugin
-function selectionError(errorMsg: string) {
-  
-}
-
 // Has to be child instances and/or the parent of the intstances
 function verifyUserInput(currentPageSelection: PageNode['selection']) {
   let currentInstanceNode: InstanceNode;
@@ -435,7 +427,7 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
 
   // If nothing selected, exit
   if (currentPageSelection.length < 1) {
-    return '';
+    return 'Nothing selected';
   }
 
 
@@ -452,7 +444,7 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
   }
 
   if (currentPageSelection.length == 1 && masterComponentFound) {
-    return 'Master component assigned but no component instances were selected. Please select the child instances you would like to clone';
+    return 'Master component found but no component instances were selected';
   }
 
   // Verify user selection of component instances under same master
@@ -461,9 +453,9 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
     // Ensure that the each node is of type instance, exit if not
     if (currentNode.type != 'INSTANCE') {
       if(masterComponentInSelection) {
-        return 'Selected items are not instances of the selected master component'
+        return 'Selected items are not all instances of the selected master component'
       } else {
-        return 'Selected items are not instances of a master component'
+        return 'Selected items are not all instances of a master component'
       }
     }
 
@@ -478,12 +470,12 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
         originalMasterComponent = currentInstanceNode.masterComponent;
         masterComponentFound = true;
       } else {
-        return 'Unable to find master component, please modify your selection';
+        return 'Unable to find a master component, please modify your selection';
       }
     } else {
       // Check that nodes have the same master
       if (originalMasterComponent !== currentInstanceNode.masterComponent) {
-        return 'Selected items have different master components, please select items with the same master component';
+        return 'Selected items are instances of different master components';
       }
     }
   }
@@ -546,47 +538,37 @@ let newMasterComponent: ComponentNode; // Copy of the original master component
 let currentInstanceNode: InstanceNode; // Current node in loop, used to suppress errors
 let newInstanceNodes: BaseNode[] = []; // Holds all newly cloned child instances 
 
-// Verifies that users selected the right thing, needs refactoring after UI
+// Verifies that users selected the right thing, returns an error msg if incorrect input
 let errorMsg = verifyUserInput(figma.currentPage.selection);
 
-console.log(errorMsg);
+if(typeof errorMsg !== 'undefined') {
+  console.log(errorMsg);
+  figma.showUI(__html__);
+  figma.ui.postMessage({type: 'inputError', message: errorMsg});
+} else {
 
-// figma.showUI(__html__);
+  newMasterComponent = originalMasterComponent.clone();
 
-// console.log(figma.currentPage.selection[0].masterComponent.name);
+  // Loops through each selected instance and copies data
+  for (const node of figma.currentPage.selection) {
 
-// figma.ui.postMessage(figma.currentPage.selection[0].masterComponent.name);
+    // Make a new instance of the original node where the copied data will lay
+    let originalInstanceNode: InstanceNode = node; // Suppress some type errors
+    let instanceNodeCopy: InstanceNode = originalInstanceNode.clone();
 
-// figma.ui.onmessage = (message) => {
-//   console.log("got this from the UI", message);
-//   if(message.type == 'cancel') {
-//     figma.closePlugin();
-//   }
-// }
+    // Set the master of the new instance to the newly created one
+    instanceNodeCopy.masterComponent = newMasterComponent;
 
-// newMasterComponent = originalMasterComponent.clone();
+    // Copies all the original data of the node into the new one
+    copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
 
-// // Loops through each selected instance and copies data
-// for (const node of figma.currentPage.selection) {
+    // Add it to our array so we can select it by default later
+    newInstanceNodes.push(instanceNodeCopy);
+  }
 
-//   // Make a new instance of the original node where the copied data will lay
-//   let originalInstanceNode: InstanceNode = node; // Suppress some type errors
-//   let instanceNodeCopy: InstanceNode = originalInstanceNode.clone();
+  // Automatically selects the newly created master and child nodes
+  // FUTURE: Move the master near the child nodes by default
+  figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
 
-//   // Set the master of the new instance to the newly created one
-//   instanceNodeCopy.masterComponent = newMasterComponent;
-
-//   // Copies all the original data of the node into the new one
-//   copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
-
-//   // Add it to our array so we can select it by default later
-//   newInstanceNodes.push(instanceNodeCopy);
-// }
-
-// // Automatically selects the newly created master and child nodes
-// // FUTURE: Move the master near the child nodes by default
-// figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
-
-// Make sure to close the plugin when you're done. Otherwise the plugin will
-// keep running, which shows the cancel button at the bottom of the screen.
-figma.closePlugin();
+  figma.closePlugin();
+}

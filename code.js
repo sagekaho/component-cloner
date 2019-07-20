@@ -47,8 +47,8 @@ function copyFrameNode(copy, original) {
     // copy['x'] = original['x'];
     // copy['y'] = original['y'];
     // Copy each child
-    var currentChild = 0;
-    original['children'].forEach(function (childNode) {
+    let currentChild = 0;
+    original['children'].forEach(childNode => {
         copyNodesBasedOnType(copy['children'][currentChild++], childNode);
     });
 }
@@ -120,8 +120,8 @@ function copyBooleanOperationNode(copy, original) {
     // copy['x'] = original['x'];
     // copy['y'] = original['y'];
     // Copy each child
-    var currentChild = 0;
-    original['children'].forEach(function (childNode) {
+    let currentChild = 0;
+    original['children'].forEach(childNode => {
         copyNodesBasedOnType(copy['children'][currentChild++], childNode);
     });
     return;
@@ -295,7 +295,7 @@ function copyTextNode(copy, original) {
     // Doesn't support Advanced Type Features, Numbers
     // Load original and new font then modify once complete
     Promise.all([figma.loadFontAsync(copy['fontName']), figma.loadFontAsync(original['fontName'])])
-        .then(function () {
+        .then(() => {
         copy['characters'] = original['characters'];
         copy['fontName'] = original['fontName'];
         copy['fontSize'] = original['fontSize'];
@@ -309,7 +309,7 @@ function copyTextNode(copy, original) {
         copy['textCase'] = original['textCase'];
         copy['textDecoration'] = original['textDecoration'];
         copy['textStyleId'] = original['textStyleId'];
-    })["catch"](function (err) {
+    }).catch((err) => {
         console.error("Clone plugin error: function copyTextNode() error: promise failed");
         console.error(err);
     });
@@ -389,8 +389,8 @@ function copyInstanceNode(copy, original) {
     // copy['x'] = original['x'];
     // copy['y'] = original['y'];
     // Copy each child
-    var currentChild = 0;
-    original['children'].forEach(function (childNode) {
+    let currentChild = 0;
+    original['children'].forEach(childNode => {
         copyNodesBasedOnType(copy['children'][currentChild++], childNode);
     });
     return;
@@ -401,21 +401,17 @@ END OF NODE COPYING FUNCTIONS
 /*-----------------------------------------------------------------------------
 OTHER HELPER FUNCTIONS
 -----------------------------------------------------------------------------*/
-// Prints the error and exits plugin
-function selectionError(errorMsg) {
-}
 // Has to be child instances and/or the parent of the intstances
 function verifyUserInput(currentPageSelection) {
-    var currentInstanceNode;
-    var masterComponentFound = false;
-    var masterComponentInSelection = false;
+    let currentInstanceNode;
+    let masterComponentFound = false;
+    let masterComponentInSelection = false;
     // If nothing selected, exit
     if (currentPageSelection.length < 1) {
-        return '';
+        return 'Nothing selected';
     }
     // Find the master component, if it has been selected
-    for (var _i = 0, currentPageSelection_1 = currentPageSelection; _i < currentPageSelection_1.length; _i++) {
-        var currentNode = currentPageSelection_1[_i];
+    for (const currentNode of currentPageSelection) {
         if (currentNode.type == 'COMPONENT') {
             if (masterComponentFound) {
                 return 'Selected more than one master component';
@@ -426,18 +422,17 @@ function verifyUserInput(currentPageSelection) {
         }
     }
     if (currentPageSelection.length == 1 && masterComponentFound) {
-        return 'Master component assigned but no component instances were selected. Please select the child instances you would like to clone';
+        return 'Master component found but no component instances were selected';
     }
     // Verify user selection of component instances under same master
-    for (var _a = 0, currentPageSelection_2 = currentPageSelection; _a < currentPageSelection_2.length; _a++) {
-        var currentNode = currentPageSelection_2[_a];
+    for (const currentNode of currentPageSelection) {
         // Ensure that the each node is of type instance, exit if not
         if (currentNode.type != 'INSTANCE') {
             if (masterComponentInSelection) {
-                return 'Selected items are not instances of the selected master component';
+                return 'Selected items are not all instances of the selected master component';
             }
             else {
-                return 'Selected items are not instances of a master component';
+                return 'Selected items are not all instances of a master component';
             }
         }
         // Specify the node type so no other errors occur
@@ -450,13 +445,13 @@ function verifyUserInput(currentPageSelection) {
                 masterComponentFound = true;
             }
             else {
-                return 'Unable to find master component, please modify your selection';
+                return 'Unable to find a master component, please modify your selection';
             }
         }
         else {
             // Check that nodes have the same master
             if (originalMasterComponent !== currentInstanceNode.masterComponent) {
-                return 'Selected items have different master components, please select items with the same master component';
+                return 'Selected items are instances of different master components';
             }
         }
     }
@@ -509,38 +504,33 @@ END OF EXTRA HELPER FUNCTIONS
 START OF MAIN PLUGIN CODE
 -----------------------------------------------------------------------------*/
 // Global variables
-var originalMasterComponent; // Master component to clone
-var newMasterComponent; // Copy of the original master component
-var currentInstanceNode; // Current node in loop, used to suppress errors
-var newInstanceNodes = []; // Holds all newly cloned child instances 
-// Verifies that users selected the right thing, needs refactoring after UI
-var errorMsg = verifyUserInput(figma.currentPage.selection);
-console.log(errorMsg);
-// figma.showUI(__html__);
-// console.log(figma.currentPage.selection[0].masterComponent.name);
-// figma.ui.postMessage(figma.currentPage.selection[0].masterComponent.name);
-// figma.ui.onmessage = (message) => {
-//   console.log("got this from the UI", message);
-//   if(message.type == 'cancel') {
-//     figma.closePlugin();
-//   }
-// }
-// newMasterComponent = originalMasterComponent.clone();
-// // Loops through each selected instance and copies data
-// for (const node of figma.currentPage.selection) {
-//   // Make a new instance of the original node where the copied data will lay
-//   let originalInstanceNode: InstanceNode = node; // Suppress some type errors
-//   let instanceNodeCopy: InstanceNode = originalInstanceNode.clone();
-//   // Set the master of the new instance to the newly created one
-//   instanceNodeCopy.masterComponent = newMasterComponent;
-//   // Copies all the original data of the node into the new one
-//   copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
-//   // Add it to our array so we can select it by default later
-//   newInstanceNodes.push(instanceNodeCopy);
-// }
-// // Automatically selects the newly created master and child nodes
-// // FUTURE: Move the master near the child nodes by default
-// figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
-// Make sure to close the plugin when you're done. Otherwise the plugin will
-// keep running, which shows the cancel button at the bottom of the screen.
-figma.closePlugin();
+let originalMasterComponent; // Master component to clone
+let newMasterComponent; // Copy of the original master component
+let currentInstanceNode; // Current node in loop, used to suppress errors
+let newInstanceNodes = []; // Holds all newly cloned child instances 
+// Verifies that users selected the right thing, returns an error msg if incorrect input
+let errorMsg = verifyUserInput(figma.currentPage.selection);
+if (typeof errorMsg !== 'undefined') {
+    console.log(errorMsg);
+    figma.showUI(__html__);
+    figma.ui.postMessage({ type: 'inputError', message: errorMsg });
+}
+else {
+    newMasterComponent = originalMasterComponent.clone();
+    // Loops through each selected instance and copies data
+    for (const node of figma.currentPage.selection) {
+        // Make a new instance of the original node where the copied data will lay
+        let originalInstanceNode = node; // Suppress some type errors
+        let instanceNodeCopy = originalInstanceNode.clone();
+        // Set the master of the new instance to the newly created one
+        instanceNodeCopy.masterComponent = newMasterComponent;
+        // Copies all the original data of the node into the new one
+        copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
+        // Add it to our array so we can select it by default later
+        newInstanceNodes.push(instanceNodeCopy);
+    }
+    // Automatically selects the newly created master and child nodes
+    // FUTURE: Move the master near the child nodes by default
+    figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
+    figma.closePlugin();
+}

@@ -1,7 +1,7 @@
 {
   "name": "clonemaster",
   "id": "KMB3t3JldvRiyVXtMD4sMp",
-  "version": "0.5.0",
-  "html": "ui.html",
-  "script": "code.js"
+  "api": "0.6.0",
+  "ui": "ui.html",
+  "main": "code.js"
 }

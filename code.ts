@@ -527,6 +527,8 @@ let newInstanceNodes: BaseNode[] = []; // Holds all newly cloned child instances
 // Verifies that users selected the right thing, needs refactoring after UI
 verifyUserInput(figma.currentPage.selection);
 
+
+
 newMasterComponent = originalMasterComponent.clone();
 
 // Loops through each selected instance and copies data

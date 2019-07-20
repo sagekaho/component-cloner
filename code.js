@@ -18,12 +18,12 @@ Errors when specifying type for node copy functions, way to suppress?
 /*-----------------------------------------------------------------------------
 NODE COPYING FUNCTIONS
 -------------------------------------------------------------------------------
-The following are helper function that copy different Node types needed for this
-application from the original instances
+The following are helper functions that copy different Node types needed for
+this plugin from the original instances
 -----------------------------------------------------------------------------*/
 function copyFrameNode(copy, original) {
     // copy['absoluteTransform'] = original['absoluteTransform'];
-    copy['backgrounds'] = original['backgrounds'];
+    // copy['backgrounds'] = original['backgrounds'];
     copy['backgroundStyleId'] = original['backgroundStyleId'];
     copy['blendMode'] = original['blendMode'];
     copy['clipsContent'] = original['clipsContent'];
@@ -37,6 +37,7 @@ function copyFrameNode(copy, original) {
     copy['locked'] = original['locked'];
     copy['name'] = original['name'];
     copy['opacity'] = original['opacity'];
+    copy['parent'] = original['parent'];
     // copy['relativeTransform'] = original['relativeTransform'];
     // copy['removed'] = original['removed'];
     // copy['rotation'] = original['rotation'];
@@ -59,7 +60,7 @@ function copyVectorNode(copy, original) {
     copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
     copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem
+    copy['effects'] = original['effects'];
     copy['exportSettings'] = original['exportSettings'];
     copy['fillStyleId'] = original['fillStyleId'];
     copy['fills'] = original['fills'];
@@ -87,16 +88,15 @@ function copyVectorNode(copy, original) {
 }
 function copyBooleanOperationNode(copy, original) {
     // copy['absoluteTransform'] = original['absoluteTransform'];
-    // copy['backgrounds'] = original['backgrounds'];
+    copy['backgrounds'] = original['backgrounds'];
     copy['blendMode'] = original['blendMode'];
     copy['booleanOperation'] = original['booleanOperation'];
-    // copy['children'] = original['children'];
     copy['constraints'] = original['constraints'];
     // copy['cornerRadius'] = original['cornerRadius'];
     // copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
     copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem
+    copy['effects'] = original['effects'];
     copy['exportSettings'] = original['exportSettings'];
     copy['fillStyleId'] = original['fillStyleId'];
     copy['fills'] = original['fills'];
@@ -134,7 +134,7 @@ function copyStarNode(copy, original) {
     copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
     copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem
+    copy['effects'] = original['effects'];
     copy['exportSettings'] = original['exportSettings'];
     copy['fillStyleId'] = original['fillStyleId'];
     copy['fills'] = original['fills'];
@@ -166,7 +166,7 @@ function copyLineNode(copy, original) {
     copy['constraints'] = original['constraints'];
     copy['dashPattern'] = original['dashPattern'];
     copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem
+    copy['effects'] = original['effects'];
     copy['exportSettings'] = original['exportSettings'];
     copy['fillStyleId'] = original['fillStyleId'];
     copy['fills'] = original['fills'];
@@ -199,7 +199,7 @@ function copyEllipseNode(copy, original) {
     // copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
     copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem
+    copy['effects'] = original['effects'];
     copy['exportSettings'] = original['exportSettings'];
     copy['fillStyleId'] = original['fillStyleId'];
     copy['fills'] = original['fills'];
@@ -231,7 +231,7 @@ function copyPolygonNode(copy, original) {
     // copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
     copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem
+    copy['effects'] = original['effects'];
     copy['exportSettings'] = original['exportSettings'];
     copy['fillStyleId'] = original['fillStyleId'];
     copy['fills'] = original['fills'];
@@ -266,7 +266,7 @@ function copyRectangleNode(copy, original) {
     // copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
     copy['effectStyleId'] = original['effectStyleId'];
-    copy['effects'] = original['effects']; // might be problem
+    copy['effects'] = original['effects'];
     copy['exportSettings'] = original['exportSettings'];
     copy['fillStyleId'] = original['fillStyleId'];
     copy['fills'] = original['fills'];
@@ -362,6 +362,7 @@ function copySliceNode(copy, original) {
     return;
 }
 function copyInstanceNode(copy, original) {
+    console.log(original);
     // copy['absoluteTransform'] = original['absoluteTransform'];
     copy['backgroundStyleId'] = original['backgroundStyleId'];
     copy['backgrounds'] = original['backgrounds'];
@@ -441,7 +442,7 @@ function verifyUserInput(currentPageSelection) {
     }
 }
 function copyNodesBasedOnType(copy, original) {
-    // console.log(original.type);
+    console.log(original.type);
     switch (original.type) {
         case 'SLICE':
             copySliceNode(copy, original);
@@ -513,4 +514,4 @@ for (var _i = 0, _a = figma.currentPage.selection; _i < _a.length; _i++) {
 figma.currentPage.selection = [newMasterComponent].concat(newInstanceNodes);
 // Make sure to close the plugin when you're done. Otherwise the plugin will
 // keep running, which shows the cancel button at the bottom of the screen.
-figma.closePlugin();
+// figma.closePlugin();

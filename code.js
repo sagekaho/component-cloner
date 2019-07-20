@@ -514,4 +514,4 @@ for (var _i = 0, _a = figma.currentPage.selection; _i < _a.length; _i++) {
 figma.currentPage.selection = [newMasterComponent].concat(newInstanceNodes);
 // Make sure to close the plugin when you're done. Otherwise the plugin will
 // keep running, which shows the cancel button at the bottom of the screen.
-// figma.closePlugin();
+figma.closePlugin();

@@ -11,9 +11,6 @@ To-do:
 Test each shape
 Think about how to make UI easy to use and understand
 
-Questions?
-Errors when specifying type for node copy functions, way to suppress?
-
 */
 /*-----------------------------------------------------------------------------
 NODE COPYING FUNCTIONS
@@ -403,6 +400,7 @@ OTHER HELPER FUNCTIONS
 -----------------------------------------------------------------------------*/
 // Has to be child instances and/or the parent of the intstances
 function verifyUserInput(currentPageSelection) {
+    let originalMasterComponent;
     let currentInstanceNode;
     let masterComponentFound = false;
     let masterComponentInSelection = false;
@@ -501,36 +499,60 @@ function copyNodesBasedOnType(copy, original) {
 END OF EXTRA HELPER FUNCTIONS
 -----------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------
-START OF MAIN PLUGIN CODE
+MAIN PLUGIN FUNCTION
 -----------------------------------------------------------------------------*/
-// Global variables
-let originalMasterComponent; // Master component to clone
-let newMasterComponent; // Copy of the original master component
-let currentInstanceNode; // Current node in loop, used to suppress errors
-let newInstanceNodes = []; // Holds all newly cloned child instances 
-// Verifies that users selected the right thing, returns an error msg if incorrect input
-let errorMsg = verifyUserInput(figma.currentPage.selection);
-if (typeof errorMsg !== 'undefined') {
-    console.log(errorMsg);
-    figma.showUI(__html__);
-    figma.ui.postMessage({ type: 'inputError', message: errorMsg });
-}
-else {
-    newMasterComponent = originalMasterComponent.clone();
-    // Loops through each selected instance and copies data
-    for (const node of figma.currentPage.selection) {
-        // Make a new instance of the original node where the copied data will lay
-        let originalInstanceNode = node; // Suppress some type errors
-        let instanceNodeCopy = originalInstanceNode.clone();
-        // Set the master of the new instance to the newly created one
-        instanceNodeCopy.masterComponent = newMasterComponent;
-        // Copies all the original data of the node into the new one
-        copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
-        // Add it to our array so we can select it by default later
-        newInstanceNodes.push(instanceNodeCopy);
+function main() {
+    let originalMasterComponent; // Master component to clone
+    let newMasterComponent; // Copy of the original master component
+    let newInstanceNodes = []; // Holds all newly cloned child instances 
+    let masterAssigned = false;
+    // Verifies that users selected the right thing, returns an error msg if incorrect input
+    let errorMsg = verifyUserInput(figma.currentPage.selection);
+    if (typeof errorMsg !== 'undefined') {
+        console.log(errorMsg);
+        figma.showUI(__html__);
+        figma.ui.postMessage({ type: 'inputError', message: errorMsg });
     }
-    // Automatically selects the newly created master and child nodes
-    // FUTURE: Move the master near the child nodes by default
-    figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
-    figma.closePlugin();
+    else {
+        // have to restructure to take out the master component
+        // Loops through each selected instance and copies data
+        for (const node of figma.currentPage.selection) {
+            // If haven't found the master component yet, assign it and clone
+            if (!masterAssigned) {
+                if (node.type == 'COMPONENT') { // If master component is first selected, clone it
+                    newMasterComponent = originalMasterComponent.clone();
+                }
+                else { // Clone the first instance it finds
+                    newMasterComponent = node.masterComponent.clone();
+                }
+                masterAssigned = true;
+            }
+            if (node.type == 'INSTANCE') {
+                // Make a new instance of the original node where the copied data will lay
+                let originalInstanceNode = node; // Suppress some type errors
+                let instanceNodeCopy = originalInstanceNode.clone();
+                // Set the master of the new instance to the newly created one
+                instanceNodeCopy.masterComponent = newMasterComponent;
+                // Copies all the original data of the node into the new one
+                copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
+                // Add it to our array so we can select it by default later
+                newInstanceNodes.push(instanceNodeCopy);
+            }
+        }
+        // Automatically selects the newly created master and child nodes
+        // FUTURE: Move the master near the child nodes by default
+        figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
+        figma.closePlugin();
+    }
 }
+/*-----------------------------------------------------------------------------
+END OF MAIN PLUGIN FUNCTION
+-----------------------------------------------------------------------------*/
+// main();
+// setInterval(function() {
+//   let currentPageSelection = figma.currentPage.selection;
+//   console.log(currentPageSelection);
+//   let error = verifyUserInput(currentPageSelection);
+//   console.log(error);
+// }, 2000);
+figma.showUI(__html__);

@@ -26,7 +26,7 @@ function copyFrameNode(copy, original) {
   copy['backgroundStyleId'] = original['backgroundStyleId'];
   copy['blendMode'] = original['blendMode'];
   copy['clipsContent'] = original['clipsContent'];
-  copy['constraints'] = original['constraints'];
+  // copy['constraints'] = original['constraints'];
   copy['effectStyleId'] = original['effectStyleId'];
   copy['effects'] = original['effects'];
   copy['exportSettings'] = original['exportSettings'];
@@ -36,7 +36,7 @@ function copyFrameNode(copy, original) {
   copy['locked'] = original['locked'];
   copy['name'] = original['name'];
   copy['opacity'] = original['opacity'];
-  copy['parent'] = original['parent'];
+  // copy['parent'] = original['parent'];
   // copy['relativeTransform'] = original['relativeTransform'];
   // copy['removed'] = original['removed'];
   // copy['rotation'] = original['rotation'];
@@ -524,6 +524,49 @@ function copyNodesBasedOnType(copy: BaseNode, original: BaseNode) {
   }
 }
 
+function clone(currentPageSelection: PageNode['selection']) {
+  let newMasterComponent: ComponentNode; // Copy of the original master component
+  let newInstanceNodes: BaseNode[] = []; // Holds all newly cloned child instances 
+  let masterAssigned = false;
+  let originalMasterComponent: ComponentNode; // Master component to clone
+    // Loops through each selected instance and copies data
+  for (const node of currentPageSelection) {
+
+    // If haven't found the master component yet, assign it and clone
+    if (!masterAssigned) {
+      if (node.type == 'COMPONENT') { // If master component is first selected, clone it
+        newMasterComponent = originalMasterComponent.clone();
+      } else { // Clone the first instance it finds
+        newMasterComponent = node.masterComponent.clone();
+      }
+      masterAssigned = true;
+    }
+
+    if (node.type == 'INSTANCE') {
+      // Make a new instance of the original node where the copied data will lay
+      let originalInstanceNode: InstanceNode = node; // Suppress some type errors
+      let instanceNodeCopy: InstanceNode = originalInstanceNode.clone();
+
+      // Set the master of the new instance to the newly created one
+      instanceNodeCopy.masterComponent = newMasterComponent;
+
+      // Copies all the original data of the node into the new one
+      copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
+
+      // Add it to our array so we can select it by default later
+      newInstanceNodes.push(instanceNodeCopy);
+
+    }
+  }
+
+  // Automatically selects the newly created master and child nodes
+  // FUTURE: Move the master near the child nodes by default
+  figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
+
+  figma.closePlugin();
+
+}
+
 /*-----------------------------------------------------------------------------
 END OF EXTRA HELPER FUNCTIONS
 -----------------------------------------------------------------------------*/
@@ -533,74 +576,38 @@ END OF EXTRA HELPER FUNCTIONS
 MAIN PLUGIN FUNCTION
 -----------------------------------------------------------------------------*/
 
-function main() {
-  let originalMasterComponent: ComponentNode; // Master component to clone
-  let newMasterComponent: ComponentNode; // Copy of the original master component
-  let newInstanceNodes: BaseNode[] = []; // Holds all newly cloned child instances 
-  let masterAssigned = false;
+function main(currentPageSelection) {
 
   // Verifies that users selected the right thing, returns an error msg if incorrect input
-  let errorMsg = verifyUserInput(figma.currentPage.selection);
+  let errorMsg = verifyUserInput(currentPageSelection);
 
   if(typeof errorMsg !== 'undefined') {
-    console.log(errorMsg);
-    figma.showUI(__html__);
     figma.ui.postMessage({type: 'inputError', message: errorMsg});
   } else {
-    // have to restructure to take out the master component
-
-    // Loops through each selected instance and copies data
-    for (const node of figma.currentPage.selection) {
-
-      // If haven't found the master component yet, assign it and clone
-      if (!masterAssigned) {
-        if (node.type == 'COMPONENT') { // If master component is first selected, clone it
-          newMasterComponent = originalMasterComponent.clone();
-        } else { // Clone the first instance it finds
-          newMasterComponent = node.masterComponent.clone();
-        }
-        masterAssigned = true;
-      }
-
-      if (node.type == 'INSTANCE') {
-        // Make a new instance of the original node where the copied data will lay
-        let originalInstanceNode: InstanceNode = node; // Suppress some type errors
-        let instanceNodeCopy: InstanceNode = originalInstanceNode.clone();
-
-        // Set the master of the new instance to the newly created one
-        instanceNodeCopy.masterComponent = newMasterComponent;
-
-        // Copies all the original data of the node into the new one
-        copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
-
-        // Add it to our array so we can select it by default later
-        newInstanceNodes.push(instanceNodeCopy);
-
-      }
-
-    }
-    // Automatically selects the newly created master and child nodes
-    // FUTURE: Move the master near the child nodes by default
-    figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
-
-    figma.closePlugin();
-}
-
-
+    console.log(currentPageSelection);
+    figma.ui.postMessage({type: 'noErrors'})
+  }
 }
 
 /*-----------------------------------------------------------------------------
 END OF MAIN PLUGIN FUNCTION
 -----------------------------------------------------------------------------*/
 
-// main();
-
-// setInterval(function() {
-//   let currentPageSelection = figma.currentPage.selection;
-//   console.log(currentPageSelection);
-//   let error = verifyUserInput(currentPageSelection);
-//   console.log(error);
-
-// }, 2000);
-
 figma.showUI(__html__);
+
+main(figma.currentPage.selection);
+
+figma.ui.onmessage = (message) => {
+  switch(message.type) {
+    case 'cancel':
+      figma.closePlugin();
+      break;
+    case 'clone':
+      clone(figma.currentPage.selection);
+      break;
+  }
+}
+
+setInterval(function() {
+  main(figma.currentPage.selection);
+}, 1000);

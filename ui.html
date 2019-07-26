@@ -203,7 +203,7 @@ function addComponent(id, name, grayedOut) {
     image = '<img class="component-icon" src="https://i.ibb.co/TR5xXps/component.png" alt="component">';
   }
 
-  div.innerHTML = image + `<input type="text" disabled value="` + name + `" class="type type--11-pos-bold component-label` + disabled + `"></input>`;
+  div.innerHTML = image + `<input type="text" disabled value="` + name + `" class="type type--11-pos-bold component-label ` + disabled + `"></input>`;
   document.getElementById('selected-comp-wrapper').appendChild(div);
   let div2 = div.cloneNode(true);
   document.getElementById('new-comp-wrapper').appendChild(div2);
@@ -218,13 +218,13 @@ function addInstance(id, name, grayedOut) {
     div.className = 'instance-dynamic comp-item disabled disabled-item';
     image = '<img src="https://i.ibb.co/p43945h/instance-disabled.png" alt="instance-disabled">';
     name = 'instance'
-    disabled = '';
+    disabled = 'disabled';
   } else {
     div.className = 'instance-dynamic comp-item';
     image = '<img src="https://i.ibb.co/jzvvCNf/instance.png" alt="instance">';
   }
 
-  div.innerHTML = image + `<input type="text" disabled value="` + name + `" class="type type--11-pos instance-label` + disabled + `"></input>`;
+  div.innerHTML = image + `<input type="text" disabled value="` + name + `" class="type type--11-pos instance-label ` + disabled + `"></input>`;
   document.getElementById('selected-comp-wrapper').appendChild(div);
   let div2 = div.cloneNode(true);
   document.getElementById('new-comp-wrapper').appendChild(div2);
@@ -240,15 +240,17 @@ onmessage = (event) => {
   switch(event.data.pluginMessage.type) {
     case 'inputError':
       displayedComponent  = {id: -1, name: ''};
-      removeInstanceAndComponents()
+      removeInstanceAndComponents();
+      removeOnboardingTip();
+      removeError();
       document.getElementById('clone-button').disabled = true;
-      if(!grayedOut) {
-        addDisabledElements();
-      }
+      addDisabledElements();
+      grayedOut = true;
       let errorMsg = event.data.pluginMessage.message;
       addError(errorMsg);
       break;
     case 'noErrors':
+      grayedOut = false;
       removeInstanceAndComponents()
       removeOnboardingTip();
       removeError();

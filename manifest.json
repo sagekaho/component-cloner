@@ -1,6 +1,6 @@
 {
-  "name": "clonemaster",
-  "id": "KMB3t3JldvRiyVXtMD4sMp",
+  "name": "Component Cloner",
+  "id": "736564662640346811",
   "api": "0.6.0",
   "ui": "ui.html",
   "main": "code.js"

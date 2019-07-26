@@ -1,7 +1,7 @@
 /*
 Component Cloner by Kate Miller (github: katekaho)
 
-Allows users to create a clone of component instances under a new master
+Allows users to create a clone of component instances under a new master component
 
 Usage: Select the existing component instances of a master component you would like to clone.
 Then hit clone to create a new master component with the instances you selected attached to it
@@ -443,6 +443,11 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
   // Verify user selection of component instances under same master
   for (const currentNode of currentPageSelection) {
 
+    // If master component, skip this iteration
+    if(masterComponentInSelection && currentNode.type == 'COMPONENT') {
+      continue;
+    }
+
     // Ensure that the each node is of type instance, exit if not
     if (currentNode.type != 'INSTANCE') {
       if(masterComponentInSelection) {
@@ -520,14 +525,14 @@ function clone(currentPageSelection: PageNode['selection']) {
   let newMasterComponent: ComponentNode; // Copy of the original master component
   let newInstanceNodes: BaseNode[] = []; // Holds all newly cloned child instances 
   let masterAssigned = false;
-  let originalMasterComponent: ComponentNode; // Master component to clone
+
     // Loops through each selected instance and copies data
   for (const node of currentPageSelection) {
 
     // If haven't found the master component yet, assign it and clone
     if (!masterAssigned) {
       if (node.type == 'COMPONENT') { // If master component is first selected, clone it
-        newMasterComponent = originalMasterComponent.clone();
+        newMasterComponent = node.clone();
       } else { // Clone the first instance it finds
         newMasterComponent = node.masterComponent.clone();
       }
@@ -613,4 +618,4 @@ figma.ui.onmessage = (message) => {
 // Runs main function on repeat to update user selection
 setInterval(function() {
   updateView(figma.currentPage.selection);
-}, 100);
+}, 500);

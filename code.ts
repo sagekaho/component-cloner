@@ -1,15 +1,10 @@
 /*
-Clone Master by Kate Miller (github: katekaho)
+Component Cloner by Kate Miller (github: katekaho)
 
 Allows users to create a clone of component instances under a new master
 
-Usage: Select the existing component instances of a master component and run the plugin
-This will create a new master component with the instances you selected attached to it
-
-To-do:
-
-Test each shape
-Think about how to make UI easy to use and understand
+Usage: Select the existing component instances of a master component you would like to clone.
+Then hit clone to create a new master component with the instances you selected attached to it
 
 */
 
@@ -376,8 +371,6 @@ function copySliceNode(copy, original) {
 }
  
 function copyInstanceNode(copy, original) {
-
-  console.log(original);
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['backgroundStyleId'] = original['backgroundStyleId'];
   copy['backgrounds'] = original['backgrounds'];
@@ -416,7 +409,7 @@ END OF NODE COPYING FUNCTIONS
 -----------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------
-OTHER HELPER FUNCTIONS
+HELPER FUNCTIONS
 -----------------------------------------------------------------------------*/
 
 // Has to be child instances and/or the parent of the intstances
@@ -426,11 +419,10 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
   let masterComponentFound: Boolean = false;
   let masterComponentInSelection: Boolean = false;
 
-  // If nothing selected, exit
+  // If nothing selected, exit with blank error msg
   if (currentPageSelection.length < 1) {
-    return 'Nothing selected';
+    return ' ';
   }
-
 
   // Find the master component, if it has been selected
   for (const currentNode of currentPageSelection) {
@@ -482,8 +474,8 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
   }
 }
 
+// Applies the right copy function based on type
 function copyNodesBasedOnType(copy: BaseNode, original: BaseNode) {
-  console.log(original.type);
   switch (original.type) {
     case 'SLICE':
       copySliceNode(copy, original);
@@ -567,16 +559,7 @@ function clone(currentPageSelection: PageNode['selection']) {
 
 }
 
-/*-----------------------------------------------------------------------------
-END OF EXTRA HELPER FUNCTIONS
------------------------------------------------------------------------------*/
-
-
-/*-----------------------------------------------------------------------------
-MAIN PLUGIN FUNCTION
------------------------------------------------------------------------------*/
-
-function main(currentPageSelection) {
+function updateView(currentPageSelection) {
 
   // Verifies that users selected the right thing, returns an error msg if incorrect input
   let errorMsg = verifyUserInput(currentPageSelection);
@@ -584,19 +567,38 @@ function main(currentPageSelection) {
   if(typeof errorMsg !== 'undefined') {
     figma.ui.postMessage({type: 'inputError', message: errorMsg});
   } else {
-    console.log(currentPageSelection);
-    figma.ui.postMessage({type: 'noErrors'})
+
+    let componentFound = false;
+
+    let component;
+    let instances = [];
+    for(const node of currentPageSelection) {
+      let props = {name: node.name, id: node.id};
+      if(node.type === 'COMPONENT') {
+        componentFound = true;
+        component = props;
+      } else {
+        instances.push(props);
+      }
+    }
+
+    if(!componentFound) {
+      let master = currentPageSelection[0].masterComponent;
+      component = {name: master.name, id: master.id};
+    }
+
+    figma.ui.postMessage({type: 'noErrors', component, instances})
   }
 }
 
 /*-----------------------------------------------------------------------------
-END OF MAIN PLUGIN FUNCTION
+END OF HELPER FUNCTIONS
 -----------------------------------------------------------------------------*/
 
+// Display user
 figma.showUI(__html__);
 
-main(figma.currentPage.selection);
-
+// Button input from user
 figma.ui.onmessage = (message) => {
   switch(message.type) {
     case 'cancel':
@@ -608,6 +610,7 @@ figma.ui.onmessage = (message) => {
   }
 }
 
+// Runs main function on repeat to update user selection
 setInterval(function() {
-  main(figma.currentPage.selection);
-}, 1000);
+  updateView(figma.currentPage.selection);
+}, 100);

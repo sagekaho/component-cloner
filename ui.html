@@ -123,17 +123,32 @@
 <script>
 
 
-addComponentDisabled('selected-comp-wrapper');
-addInstanceDisabled('selected-comp-wrapper');
 
-addComponentDisabled('new-comp-wrapper');
-addInstanceDisabled('new-comp-wrapper');
+addDisabledElements();
 
-addOnboardingTip();
+function addDisabledElements() {
+  addComponent(0, 'component', true);
+  addInstance(0, 'instance', true);
+  addOnboardingTip();
+}
 
+function removeInstanceAndComponents() {
+  let selected = document.getElementById('selected-comp-wrapper');
+  while(selected.firstChild) {
+    selected.removeChild(selected.firstChild);
+  }
+  let newItems = document.getElementById('new-comp-wrapper');
+  while(newItems.firstChild) {
+    newItems.removeChild(newItems.firstChild);
+  }
+}
 
 function addOnboardingTip() {
+
+  let onboard = document.getElementById('onboarding-tip');
+
   const div = document.createElement('div');
+  div.id = 'onboarding-tip'
   div.className = 'onboarding-tip';
   div.innerHTML = `<div class="onboarding-tip__icon">
                     <div class="icon icon--visible"></div>
@@ -174,60 +189,88 @@ function removeError() {
   }
 }
 
-function addComponentDisabled(id) {
+function addComponent(id, name, grayedOut) {
   const div = document.createElement('div');
-  div.className = 'component comp-item disabled';
-  div.innerHTML =  `
-                      <img src="https://i.ibb.co/5LjGCMH/component-disabled.png" alt="component-disabled">
-                      <input type="text" disabled value="Component" class="type type--11-pos-bold component-label disabled"></input>
-                    `;
-  document.getElementById(id).appendChild(div);
+  let image;
+  let disabled = '';
+
+  if(grayedOut) {
+    div.className = 'component comp-item disabled disabled-item';
+    image = '<img src="https://i.ibb.co/5LjGCMH/component-disabled.png" alt="component-disabled">'
+    disabled = 'disabled'
+  } else {
+    div.className = 'component comp-item';
+    image = '<img class="component-icon" src="https://i.ibb.co/TR5xXps/component.png" alt="component">';
+  }
+
+  div.innerHTML = image + `<input type="text" disabled value="` + name + `" class="type type--11-pos-bold component-label` + disabled + `"></input>`;
+  document.getElementById('selected-comp-wrapper').appendChild(div);
+  let div2 = div.cloneNode(true);
+  document.getElementById('new-comp-wrapper').appendChild(div2);
 }
 
-function addComponent(id, name) {
+function addInstance(id, name, grayedOut) {
   const div = document.createElement('div');
-  div.className = 'component comp-item';
-  div.innerHTML = `<img class="component-icon" src="https://i.ibb.co/TR5xXps/component.png"                      alt="component">
-              <input type="text" disabled value="` + name + `" class="type type--11-pos-bold component-label"></input>`;
-  document.getElementById(id).appendChild(div);
+  let image;
+  let disabled = '';
+
+  if(grayedOut) {
+    div.className = 'instance-dynamic comp-item disabled disabled-item';
+    image = '<img src="https://i.ibb.co/p43945h/instance-disabled.png" alt="instance-disabled">';
+    name = 'instance'
+    disabled = '';
+  } else {
+    div.className = 'instance-dynamic comp-item';
+    image = '<img src="https://i.ibb.co/jzvvCNf/instance.png" alt="instance">';
+  }
+
+  div.innerHTML = image + `<input type="text" disabled value="` + name + `" class="type type--11-pos instance-label` + disabled + `"></input>`;
+  document.getElementById('selected-comp-wrapper').appendChild(div);
+  let div2 = div.cloneNode(true);
+  document.getElementById('new-comp-wrapper').appendChild(div2);
 }
 
 
-function addInstanceDisabled(id) {
-  const div = document.createElement('div');
-  div.className = 'instance-dynamic comp-item disabled';
-  div.innerHTML = `<img src="https://i.ibb.co/p43945h/instance-disabled.png" alt="instance-disabled">
-                    <input type="text" disabled value="Instance" class="type type--11-pos instance-label disabled"></input>`;
-
-  document.getElementById(id).appendChild(div);
-}
-
-function addInstance(id, name) {
-  const div = document.createElement('div');
-  div.className = 'instance-dynamic comp-item';
-  div.innerHTML = `<img src="https://i.ibb.co/jzvvCNf/instance.png" alt="instance">
-            <input type="text" disabled value="` + name + `" class="type type--11-pos instance-label"></input>`;
-
-  document.getElementById(id).appendChild(div);
-}
+let displayedComponent  = {id: -1, name: ''};
+let displayedInstances = [];
+let grayedOut = true;
 
 onmessage = (event) => {
+  let disabledElements;
   switch(event.data.pluginMessage.type) {
     case 'inputError':
+      displayedComponent  = {id: -1, name: ''};
+      removeInstanceAndComponents()
       document.getElementById('clone-button').disabled = true;
+      if(!grayedOut) {
+        addDisabledElements();
+      }
       let errorMsg = event.data.pluginMessage.message;
       addError(errorMsg);
       break;
     case 'noErrors':
+      removeInstanceAndComponents()
+      removeOnboardingTip();
       removeError();
-      removeOnboardingTip()
+      let component = event.data.pluginMessage.component;
+      let instances = event.data.pluginMessage.instances;
+
+      // In future iteration, plan to add editing of names
+      displayedComponent = component;
+      displayedInstances = instances;
+
+      addComponent(displayedComponent.id, displayedComponent.name, false);
+
+      displayedInstances.forEach(instance => {
+        addInstance(instance.id, instance.name, false);
+      })
+
       document.getElementById('clone-button').disabled = false;
       break;
   }
 }
 
 document.getElementById('cancel-button').onclick = () => {
-  // const text = document.querySelector('#textbox').value
   parent.postMessage({ pluginMessage: {type: 'cancel'} }, '*');
 }
 document.getElementById('clone-button').onclick = () => {

@@ -13,6 +13,8 @@ NODE COPYING FUNCTIONS
 -------------------------------------------------------------------------------
 The following are helper functions that copy different Node types needed for  
 this plugin from the original instances
+
+Commented out fields means they can't be copied since they are instances
 -----------------------------------------------------------------------------*/
 
 function copyFrameNode(copy, original) {
@@ -52,7 +54,9 @@ function copyVectorNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['blendMode'] = original['blendMode'];
   copy['constraints'] = original['constraints'];
-  copy['cornerRadius'] = original['cornerRadius'];
+  if (original['cornerRadius'] !== figma.mixed) {
+    copy['cornerRadius'] = original['cornerRadius'];
+  }
   copy['cornerSmoothing'] = original['cornerSmoothing'];
   copy['dashPattern'] = original['dashPattern'];
   copy['effectStyleId'] = original['effectStyleId'];
@@ -60,7 +64,7 @@ function copyVectorNode(copy, original) {
   copy['exportSettings'] = original['exportSettings'];
   copy['fillStyleId'] = original['fillStyleId'];
   copy['fills'] = original['fills'];
-  copy['handleMirroring'] = original['handleMirroring'];
+  // copy['handleMirroring'] = original['handleMirroring'];
   // copy['height'] = original['height'];
   // copy['isMask'] = original['isMask'];
   copy['locked'] = original['locked'];
@@ -70,13 +74,18 @@ function copyVectorNode(copy, original) {
   // copy['removed'] = original['removed'];
   // copy['rotation'] = original['rotation'];
   copy['strokeAlign'] = original['strokeAlign'];
-  copy['strokeCap'] = original['strokeCap'];
-  copy['strokeJoin'] = original['strokeJoin'];
+  // If any fields are mixed, don't copy for now
+  if (original['strokeCap'] !== figma.mixed) {
+    copy['strokeCap'] = original['strokeCap'];
+  } 
+  if (original['strokeJoin'] !== figma.mixed) {
+    copy['strokeJoin'] = original['strokeJoin'];
+  }
   copy['strokeStyleId'] = original['strokeStyleId'];
   copy['strokeWeight'] = original['strokeWeight'];
   copy['strokes'] = original['strokes'];
   // copy['type'] = original['type'];
-  copy['vectorNetwork'] = original['vectorNetwork'];
+  // copy['vectorNetwork'] = original['vectorNetwork'];
   copy['visible'] = original['visible'];
   // copy['width'] = original['width'];
   // copy['x'] = original['x'];
@@ -266,8 +275,12 @@ function copyRectangleNode(copy, original) {
   // copy['bottomLeftRadius'] = original['bottomLeftRadius'];
   // copy['bottomRightRadius'] = original['bottomRightRadius'];
   copy['constraints'] = original['constraints'];
-  // copy['cornerRadius'] = original['cornerRadius'];
-  // copy['cornerSmoothing'] = original['cornerSmoothing'];
+  if (original['cornerRadius'] !== figma.mixed) {
+    copy['cornerRadius'] = original['cornerRadius'];
+  }
+  if(original['cornerSmoothing'] !== figma.mixed){
+    copy['cornerSmoothing'] = original['cornerSmoothing'];
+  }
   copy['dashPattern'] = original['dashPattern'];
   copy['effectStyleId'] = original['effectStyleId'];
   copy['effects'] = original['effects']; 
@@ -300,25 +313,41 @@ function copyTextNode(copy, original) {
   // Doesn't support Advanced Type Features, Numbers
 
   // Load original and new font then modify once complete
-  Promise.all([figma.loadFontAsync(copy['fontName']), figma.loadFontAsync(original['fontName'])])
-  .then(() => {
-      copy['characters'] = original['characters'];
-      copy['fontName'] = original['fontName'];
-      copy['fontSize'] = original['fontSize'];
-      copy['letterSpacing'] = original['letterSpacing'];
-      copy['lineHeight'] = original['lineHeight'];
-      copy['paragraphIndent'] = original['paragraphIndent'];
-      copy['paragraphSpacing'] = original['paragraphSpacing'];
-      copy['textAlignHorizontal'] = original['textAlignHorizontal'];
-      copy['textAlignVertical'] = original['textAlignVertical'];
-      copy['textAutoResize'] = original['textAutoResize'];
-      copy['textCase'] = original['textCase'];
-      copy['textDecoration'] = original['textDecoration'];
-      copy['textStyleId'] = original['textStyleId'];
-  }).catch((err) => {
-    console.error("Clone plugin error: function copyTextNode() error: promise failed");
-    console.error(err)
-  });
+  if(original['fontName'] !== figma.mixed) {
+    Promise.all([figma.loadFontAsync(copy['fontName']), figma.loadFontAsync(original['fontName'])])
+    .then(() => {
+        copy['characters'] = original['characters'];
+        if (original['fontName'] !== figma.mixed) {
+          copy['fontName'] = original['fontName'];
+        }
+        if (original['fontSize'] !== figma.mixed) {
+        copy['fontSize'] = original['fontSize'];
+        }
+        if (original['letterSpacing'] !== figma.mixed) {
+          copy['letterSpacing'] = original['letterSpacing'];
+        }
+        if (original['lineHeight'] !== figma.mixed) {
+          copy['lineHeight'] = original['lineHeight'];
+        }
+        copy['paragraphIndent'] = original['paragraphIndent'];
+        copy['paragraphSpacing'] = original['paragraphSpacing'];
+        copy['textAlignHorizontal'] = original['textAlignHorizontal'];
+        copy['textAlignVertical'] = original['textAlignVertical'];
+        copy['textAutoResize'] = original['textAutoResize'];
+        if (original['textCase'] !== figma.mixed) {
+          copy['textCase'] = original['textCase'];
+        }
+        if (original['textDecoration'] !== figma.mixed) {
+          copy['textDecoration'] = original['textDecoration'];
+        }
+        if (original['textStyleId'] !== figma.mixed) {
+          copy['textStyleId'] = original['textStyleId'];
+        }
+    }).catch((err) => {
+      console.error("Clone plugin error: function copyTextNode() error: promise failed");
+      console.error(err)
+    });
+  }
 
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['autoRename'] = original['autoRename'];
@@ -328,8 +357,12 @@ function copyTextNode(copy, original) {
   copy['effectStyleId'] = original['effectStyleId'];
   copy['effects'] = original['effects'];
   copy['exportSettings'] = original['exportSettings'];
-  copy['fillStyleId'] = original['fillStyleId'];
-  copy['fills'] = original['fills'];
+  if (original['fillStyleId'] !== figma.mixed) {
+    copy['fillStyleId'] = original['fillStyleId'];
+  }
+  if (original['fills'] !== figma.mixed) {
+    copy['fills'] = original['fills'];
+  }
   // copy['height'] = original['height'];
   // copy['isMask'] = original['isMask'];
   copy['locked'] = original['locked'];
@@ -437,7 +470,8 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
   }
 
   if (currentPageSelection.length == 1 && masterComponentFound) {
-    return 'Master component found but no component instances were selected';
+    // Clone just the master component
+    return;
   }
 
   // Verify user selection of component instances under same master
@@ -600,7 +634,6 @@ function updateView(currentPageSelection) {
 END OF HELPER FUNCTIONS
 -----------------------------------------------------------------------------*/
 
-// Display user
 figma.showUI(__html__);
 
 // Button input from user

@@ -263,6 +263,7 @@ onmessage = (event) => {
 
       addComponent(displayedComponent.id, displayedComponent.name, false);
 
+
       displayedInstances.forEach(instance => {
         addInstance(instance.id, instance.name, false);
       })
@@ -276,6 +277,7 @@ document.getElementById('cancel-button').onclick = () => {
   parent.postMessage({ pluginMessage: {type: 'cancel'} }, '*');
 }
 document.getElementById('clone-button').onclick = () => {
+  document.getElementById('clone-button').disabled = true;
   parent.postMessage({ pluginMessage: {type: 'clone'} }, '*');
 }
 

@@ -558,7 +558,10 @@ function clone(currentPageSelection) {
     // Automatically selects the newly created master and child nodes
     // FUTURE: Move the master near the child nodes by default
     figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
-    figma.closePlugin();
+    // Display message of completion
+    figma.ui.postMessage({ type: 'complete' });
+    // Close plugin after 1 second
+    setTimeout(() => figma.closePlugin(), 900);
 }
 function updateView(currentPageSelection) {
     // Verifies that users selected the right thing, returns an error msg if incorrect input
@@ -598,11 +601,12 @@ figma.ui.onmessage = (message) => {
             figma.closePlugin();
             break;
         case 'clone':
+            clearInterval(intervalId);
             clone(figma.currentPage.selection);
             break;
     }
 };
 // Runs main function on repeat to update user selection
-setInterval(function () {
+let intervalId = setInterval(function () {
     updateView(figma.currentPage.selection);
 }, 500);

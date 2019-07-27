@@ -90,6 +90,13 @@
     outline: none;
   }
 
+  .completed {
+    align-items: center;
+    color: #0ACE82;
+    display: flex;
+    margin: 80 0;
+  }
+
 
 </style>
 
@@ -126,6 +133,21 @@
 
 addDisabledElements();
 
+function addCompleted() {
+  // Remove everything
+  document.getElementById('cancel-button').remove();
+  document.getElementById('clone-button').remove();
+  [...document.getElementsByClassName('selected-new-wrapper')].map(n => n && n.remove());
+
+  // Create and add completed notification
+  const div = document.createElement('div');
+  div.id = 'completed'
+  div.className = 'completed type type--12-pos-bold';
+  div.innerHTML = `<div>Cloning Complete</div> <div class="icon icon--resolve"></div>`;
+  
+  document.getElementById('onboarding-tip-wrapper').appendChild(div);
+}
+
 function addDisabledElements() {
   addComponent(0, 'component', true);
   addInstance(0, 'instance', true);
@@ -153,7 +175,7 @@ function addOnboardingTip() {
   div.innerHTML = `<div class="onboarding-tip__icon">
                     <div class="icon icon--visible"></div>
                   </div>
-                  <div class="onboarding-tip__msg">Select component instances to begin.</div>
+                  <div class="onboarding-tip__msg">Select a component or instance to clone</div>
                   `;
   document.getElementById('onboarding-tip-wrapper').appendChild(div);
 }
@@ -269,6 +291,10 @@ onmessage = (event) => {
       })
 
       document.getElementById('clone-button').disabled = false;
+      break;
+    case 'complete':
+      removeInstanceAndComponents();
+      addCompleted();
       break;
   }
 }

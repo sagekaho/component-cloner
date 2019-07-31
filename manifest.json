@@ -1,7 +1,7 @@
 {
   "name": "Component Cloner",
   "id": "736564662640346811",
-  "api": "0.6.0",
+  "api": "1.0.0",
   "ui": "ui.html",
   "main": "code.js"
 }

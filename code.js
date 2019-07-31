@@ -372,7 +372,7 @@ function copyTextNode(copy, original) {
 }
 function copySliceNode(copy, original) {
     // copy['absoluteTransform'] = original['absoluteTransform'];
-    copy['constraints'] = original['constraints'];
+    // copy['constraints'] = original['constraints'];
     copy['exportSettings'] = original['exportSettings'];
     // copy['height'] = original['height'];
     copy['locked'] = original['locked'];
@@ -531,6 +531,7 @@ function clone(currentPageSelection) {
     let newMasterComponent; // Copy of the original master component
     let newInstanceNodes = []; // Holds all newly cloned child instances 
     let masterAssigned = false;
+    let nodeOffset = 30; // Determines how far the nodes move from the original (x and y)
     // Loops through each selected instance and copies data
     for (const node of currentPageSelection) {
         // If haven't found the master component yet, assign it and clone
@@ -541,6 +542,8 @@ function clone(currentPageSelection) {
             else { // Clone the first instance it finds
                 newMasterComponent = node.masterComponent.clone();
             }
+            newMasterComponent['x'] = newMasterComponent['x'] + nodeOffset;
+            newMasterComponent['y'] = newMasterComponent['y'] + nodeOffset;
             masterAssigned = true;
         }
         if (node.type == 'INSTANCE') {
@@ -551,6 +554,8 @@ function clone(currentPageSelection) {
             instanceNodeCopy.masterComponent = newMasterComponent;
             // Copies all the original data of the node into the new one
             copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
+            instanceNodeCopy['x'] = instanceNodeCopy['x'] + nodeOffset;
+            instanceNodeCopy['y'] = instanceNodeCopy['y'] + nodeOffset;
             // Add it to our array so we can select it by default later
             newInstanceNodes.push(instanceNodeCopy);
         }

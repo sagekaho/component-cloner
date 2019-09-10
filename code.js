@@ -7,6 +7,192 @@ Usage: Select the existing component instances of a master component you would l
 Then hit clone to create a new master component with the instances you selected attached to it
 
 */
+figma.showUI(__html__);
+let updateUIIntervalId = setInterval(() => {
+    updateUI(figma.currentPage.selection);
+}, 500);
+// Run on input from ui.html
+figma.ui.onmessage = (message) => {
+    switch (message.type) {
+        case 'cancel':
+            figma.closePlugin();
+            break;
+        case 'clone':
+            clearInterval(updateUIIntervalId);
+            cloneNodes(figma.currentPage.selection);
+            break;
+    }
+};
+/*-----------------------------------------------------------------------------
+HELPER FUNCTIONS
+-----------------------------------------------------------------------------*/
+function updateUI(currentPageSelection) {
+    let errorMsg = verifyUserInput(currentPageSelection);
+    if (typeof errorMsg !== 'undefined') {
+        figma.ui.postMessage({ type: 'inputError', message: errorMsg });
+    }
+    else {
+        let componentFound = false;
+        let component;
+        let instances = [];
+        for (const node of currentPageSelection) {
+            let props = { name: node.name, id: node.id };
+            if (node.type === 'COMPONENT') {
+                componentFound = true;
+                component = props;
+            }
+            else {
+                instances.push(props);
+            }
+        }
+        if (!componentFound) {
+            let master = currentPageSelection[0].masterComponent;
+            component = { name: master.name, id: master.id };
+        }
+        figma.ui.postMessage({ type: 'noErrors', component, instances });
+    }
+}
+// Verify that child instances and/or the parent of the instances are selected
+function verifyUserInput(currentPageSelection) {
+    let originalComponent;
+    let originalComponentFound = false;
+    let originalComponentInSelection = false;
+    if (currentPageSelection.length < 1) {
+        return ' ';
+    }
+    // Find the master component, if it has been selected
+    for (const currentNode of currentPageSelection) {
+        if (currentNode.type == 'COMPONENT') {
+            if (originalComponentFound) {
+                return 'Selected more than one master component';
+            }
+            originalComponentFound = true;
+            originalComponentInSelection = true;
+            originalComponent = currentNode;
+            if (currentPageSelection.length == 1) {
+                return;
+            }
+        }
+    }
+    // Verify user selection of component instances under same master
+    for (const currentNode of currentPageSelection) {
+        // If master component, skip this iteration
+        if (originalComponentInSelection && currentNode.type == 'COMPONENT') {
+            continue;
+        }
+        // Ensure that the each node is of type instance, exit if not
+        if (currentNode.type != 'INSTANCE') {
+            if (originalComponentInSelection) {
+                return 'Selected items are not all instances of the selected master component';
+            }
+            else {
+                return 'Selected items are not all instances of a master component';
+            }
+        }
+        // Ensure that each selected element has the same master
+        if (originalComponent == null) {
+            // Sets the master component on the first loop
+            if (!originalComponentFound) {
+                originalComponent = currentNode.masterComponent;
+                originalComponentFound = true;
+            }
+            else {
+                return 'Unable to find a master component, please modify your selection';
+            }
+        }
+        else {
+            // Check that nodes have the same master
+            if (originalComponent !== currentNode.masterComponent) {
+                return 'Selected items are instances of different master components';
+            }
+        }
+    }
+}
+function cloneNodeBasedOnType(copy, original) {
+    switch (original.type) {
+        case 'SLICE':
+            copySliceNode(copy, original);
+            break;
+        case 'FRAME':
+        case 'GROUP':
+            copyFrameNode(copy, original);
+            break;
+        case 'INSTANCE':
+            copyInstanceNode(copy, original);
+            break;
+        case 'BOOLEAN_OPERATION':
+            copyBooleanOperationNode(copy, original);
+            break;
+        case 'VECTOR':
+            copyVectorNode(copy, original);
+            break;
+        case 'STAR':
+            copyStarNode(copy, original);
+            break;
+        case 'LINE':
+            copyLineNode(copy, original);
+            break;
+        case 'ELLIPSE':
+            copyEllipseNode(copy, original);
+            break;
+        case 'POLYGON':
+            copyPolygonNode(copy, original);
+            break;
+        case 'RECTANGLE':
+            copyRectangleNode(copy, original);
+            break;
+        case 'TEXT':
+            copyTextNode(copy, original);
+            break;
+        default:
+            console.error('Some other node type, need to add functionality');
+    }
+}
+function cloneNodes(currentPageSelection) {
+    let newMasterComponent;
+    let newInstanceNodes = [];
+    let masterAssigned = false;
+    let clonedNodeXYOffset = 40; // Determines how far the nodes move from the original (x and y)
+    for (const node of currentPageSelection) {
+        // If haven't found the master component yet, assign it and clone
+        if (!masterAssigned) {
+            if (node.type == 'COMPONENT') { // If master component is first selected, clone it
+                newMasterComponent = node.clone();
+            }
+            else { // Clone the first instance it finds
+                newMasterComponent = node.masterComponent.clone();
+            }
+            newMasterComponent['x'] = newMasterComponent['x'] + clonedNodeXYOffset;
+            newMasterComponent['y'] = newMasterComponent['y'] + clonedNodeXYOffset;
+            masterAssigned = true;
+        }
+        if (node.type == 'INSTANCE') {
+            // Make a new instance of the original node where the copied data will lay
+            let originalInstanceNode = node; // Suppress some type errors
+            let instanceNodeCopy = originalInstanceNode.clone();
+            // Set the master of the new instance to the newly created one
+            instanceNodeCopy.masterComponent = newMasterComponent;
+            // Copies all the original data of the node into the new one
+            cloneNodeBasedOnType(instanceNodeCopy, originalInstanceNode);
+            instanceNodeCopy['x'] = instanceNodeCopy['x'] + clonedNodeXYOffset;
+            instanceNodeCopy['y'] = instanceNodeCopy['y'] + clonedNodeXYOffset;
+            // Add it to our array so we can select it by default later
+            newInstanceNodes.push(instanceNodeCopy);
+        }
+    }
+    // Automatically selects the newly created master and child nodes
+    // FUTURE: Move the master near the child nodes by default
+    figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
+    // Display message of completion
+    figma.ui.postMessage({ type: 'complete' });
+    // Set viewport to cloned nodes
+    figma.viewport.scrollAndZoomIntoView(figma.currentPage.selection);
+    // Close plugin after 1 second
+    setTimeout(() => figma.closePlugin(), 900);
+}
+/*-----------------------------------------------------------------------------
+END OF HELPER FUNCTIONS
+-----------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------
 NODE COPYING FUNCTIONS
 -------------------------------------------------------------------------------
@@ -43,7 +229,7 @@ function copyFrameNode(copy, original) {
     // Copy each child
     let currentChild = 0;
     original['children'].forEach(childNode => {
-        copyNodesBasedOnType(copy['children'][currentChild++], childNode);
+        cloneNodeBasedOnType(copy['children'][currentChild++], childNode);
     });
 }
 function copyVectorNode(copy, original) {
@@ -123,7 +309,7 @@ function copyBooleanOperationNode(copy, original) {
     // Copy each child
     let currentChild = 0;
     original['children'].forEach(childNode => {
-        copyNodesBasedOnType(copy['children'][currentChild++], childNode);
+        cloneNodeBasedOnType(copy['children'][currentChild++], childNode);
     });
     return;
 }
@@ -415,203 +601,10 @@ function copyInstanceNode(copy, original) {
     // Copy each child
     let currentChild = 0;
     original['children'].forEach(childNode => {
-        copyNodesBasedOnType(copy['children'][currentChild++], childNode);
+        cloneNodeBasedOnType(copy['children'][currentChild++], childNode);
     });
     return;
 }
 /*-----------------------------------------------------------------------------
 END OF NODE COPYING FUNCTIONS
------------------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------------
-HELPER FUNCTIONS
------------------------------------------------------------------------------*/
-// Has to be child instances and/or the parent of the intstances
-function verifyUserInput(currentPageSelection) {
-    let originalMasterComponent;
-    let currentInstanceNode;
-    let masterComponentFound = false;
-    let masterComponentInSelection = false;
-    // If nothing selected, exit with blank error msg
-    if (currentPageSelection.length < 1) {
-        return ' ';
-    }
-    // Find the master component, if it has been selected
-    for (const currentNode of currentPageSelection) {
-        if (currentNode.type == 'COMPONENT') {
-            if (masterComponentFound) {
-                return 'Selected more than one master component';
-            }
-            masterComponentFound = true;
-            masterComponentInSelection = true;
-            originalMasterComponent = currentNode;
-        }
-    }
-    if (currentPageSelection.length == 1 && masterComponentFound) {
-        // Clone just the master component
-        return;
-    }
-    // Verify user selection of component instances under same master
-    for (const currentNode of currentPageSelection) {
-        // If master component, skip this iteration
-        if (masterComponentInSelection && currentNode.type == 'COMPONENT') {
-            continue;
-        }
-        // Ensure that the each node is of type instance, exit if not
-        if (currentNode.type != 'INSTANCE') {
-            if (masterComponentInSelection) {
-                return 'Selected items are not all instances of the selected master component';
-            }
-            else {
-                return 'Selected items are not all instances of a master component';
-            }
-        }
-        // Specify the node type so no other errors occur
-        currentInstanceNode = currentNode;
-        // Ensure that each selected element has the same master
-        if (originalMasterComponent == null) {
-            // Sets the master component on the first loop
-            if (!masterComponentFound) {
-                originalMasterComponent = currentInstanceNode.masterComponent;
-                masterComponentFound = true;
-            }
-            else {
-                return 'Unable to find a master component, please modify your selection';
-            }
-        }
-        else {
-            // Check that nodes have the same master
-            if (originalMasterComponent !== currentInstanceNode.masterComponent) {
-                return 'Selected items are instances of different master components';
-            }
-        }
-    }
-}
-// Applies the right copy function based on type
-function copyNodesBasedOnType(copy, original) {
-    switch (original.type) {
-        case 'SLICE':
-            copySliceNode(copy, original);
-            break;
-        case 'FRAME':
-        case 'GROUP':
-            copyFrameNode(copy, original);
-            break;
-        case 'INSTANCE':
-            copyInstanceNode(copy, original);
-            break;
-        case 'BOOLEAN_OPERATION':
-            copyBooleanOperationNode(copy, original);
-            break;
-        case 'VECTOR':
-            copyVectorNode(copy, original);
-            break;
-        case 'STAR':
-            copyStarNode(copy, original);
-            break;
-        case 'LINE':
-            copyLineNode(copy, original);
-            break;
-        case 'ELLIPSE':
-            copyEllipseNode(copy, original);
-            break;
-        case 'POLYGON':
-            copyPolygonNode(copy, original);
-            break;
-        case 'RECTANGLE':
-            copyRectangleNode(copy, original);
-            break;
-        case 'TEXT':
-            copyTextNode(copy, original);
-            break;
-        default:
-            console.error('Some other node type, need to add functionality');
-    }
-}
-function clone(currentPageSelection) {
-    let newMasterComponent; // Copy of the original master component
-    let newInstanceNodes = []; // Holds all newly cloned child instances 
-    let masterAssigned = false;
-    let nodeOffset = 30; // Determines how far the nodes move from the original (x and y)
-    // Loops through each selected instance and copies data
-    for (const node of currentPageSelection) {
-        // If haven't found the master component yet, assign it and clone
-        if (!masterAssigned) {
-            if (node.type == 'COMPONENT') { // If master component is first selected, clone it
-                newMasterComponent = node.clone();
-            }
-            else { // Clone the first instance it finds
-                newMasterComponent = node.masterComponent.clone();
-            }
-            newMasterComponent['x'] = newMasterComponent['x'] + nodeOffset;
-            newMasterComponent['y'] = newMasterComponent['y'] + nodeOffset;
-            masterAssigned = true;
-        }
-        if (node.type == 'INSTANCE') {
-            // Make a new instance of the original node where the copied data will lay
-            let originalInstanceNode = node; // Suppress some type errors
-            let instanceNodeCopy = originalInstanceNode.clone();
-            // Set the master of the new instance to the newly created one
-            instanceNodeCopy.masterComponent = newMasterComponent;
-            // Copies all the original data of the node into the new one
-            copyNodesBasedOnType(instanceNodeCopy, originalInstanceNode);
-            instanceNodeCopy['x'] = instanceNodeCopy['x'] + nodeOffset;
-            instanceNodeCopy['y'] = instanceNodeCopy['y'] + nodeOffset;
-            // Add it to our array so we can select it by default later
-            newInstanceNodes.push(instanceNodeCopy);
-        }
-    }
-    // Automatically selects the newly created master and child nodes
-    // FUTURE: Move the master near the child nodes by default
-    figma.currentPage.selection = [newMasterComponent, ...newInstanceNodes];
-    // Display message of completion
-    figma.ui.postMessage({ type: 'complete' });
-    // Close plugin after 1 second
-    setTimeout(() => figma.closePlugin(), 900);
-}
-function updateView(currentPageSelection) {
-    // Verifies that users selected the right thing, returns an error msg if incorrect input
-    let errorMsg = verifyUserInput(currentPageSelection);
-    if (typeof errorMsg !== 'undefined') {
-        figma.ui.postMessage({ type: 'inputError', message: errorMsg });
-    }
-    else {
-        let componentFound = false;
-        let component;
-        let instances = [];
-        for (const node of currentPageSelection) {
-            let props = { name: node.name, id: node.id };
-            if (node.type === 'COMPONENT') {
-                componentFound = true;
-                component = props;
-            }
-            else {
-                instances.push(props);
-            }
-        }
-        if (!componentFound) {
-            let master = currentPageSelection[0].masterComponent;
-            component = { name: master.name, id: master.id };
-        }
-        figma.ui.postMessage({ type: 'noErrors', component, instances });
-    }
-}
-/*-----------------------------------------------------------------------------
-END OF HELPER FUNCTIONS
------------------------------------------------------------------------------*/
-figma.showUI(__html__);
-// Button input from user
-figma.ui.onmessage = (message) => {
-    switch (message.type) {
-        case 'cancel':
-            figma.closePlugin();
-            break;
-        case 'clone':
-            clearInterval(intervalId);
-            clone(figma.currentPage.selection);
-            break;
-    }
-};
-// Runs main function on repeat to update user selection
-let intervalId = setInterval(function () {
-    updateView(figma.currentPage.selection);
-}, 500);
+-----------------------------------------------------------------------------*/ 

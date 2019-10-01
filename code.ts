@@ -219,7 +219,7 @@ function cloneNodes(currentPageSelection) {
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.selection);
 
   // Close plugin after 1 second
-  setTimeout(() => figma.closePlugin(), 900);
+  // setTimeout(() => figma.closePlugin(), 900);
   
 }
 
@@ -237,9 +237,11 @@ Commented out fields means they can't be copied since they are instances
 -----------------------------------------------------------------------------*/
 
 function copyFrameNode(copy, original) {
+
+  console.log(original);
   // copy['absoluteTransform'] = original['absoluteTransform'];
-  // copy['backgrounds'] = original['backgrounds'];
   copy['backgroundStyleId'] = original['backgroundStyleId'];
+  copy['backgrounds'] = original['backgrounds'];
   copy['blendMode'] = original['blendMode'];
   copy['clipsContent'] = original['clipsContent'];
   // copy['constraints'] = original['constraints'];

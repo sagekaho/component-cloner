@@ -1,10 +1,12 @@
 /*
 Component Cloner by Kate Miller (github: katekaho)
 
-Allows users to create a clone of component instances under a new master component
+Figma plugin which allows users to create a clone of component instances under a new master component
 
 Usage: Select the existing component instances of a master component you would like to clone.
 Then hit clone to create a new master component with the instances you selected attached to it
+
+Link: https://www.figma.com/c/plugin/736564662640346811/Component-Cloner
 
 */
 figma.showUI(__html__);

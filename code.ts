@@ -125,6 +125,7 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
 }
 
 function cloneNodeBasedOnType(copy: BaseNode, original: BaseNode) {
+  // console.log(original);
   switch (original.type) {
     case 'SLICE':
       copySliceNode(copy, original);
@@ -237,8 +238,6 @@ Commented out fields means they can't be copied since they are instances
 -----------------------------------------------------------------------------*/
 
 function copyFrameNode(copy, original) {
-
-  console.log(original);
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['backgroundStyleId'] = original['backgroundStyleId'];
   copy['backgrounds'] = original['backgrounds'];
@@ -274,7 +273,7 @@ function copyFrameNode(copy, original) {
 function copyVectorNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['blendMode'] = original['blendMode'];
-  copy['constraints'] = original['constraints'];
+  // copy['constraints'] = original['constraints'];
   if (original['cornerRadius'] !== figma.mixed) {
     copy['cornerRadius'] = original['cornerRadius'];
   }
@@ -319,7 +318,7 @@ function copyBooleanOperationNode(copy, original) {
   copy['backgrounds'] = original['backgrounds'];
   copy['blendMode'] = original['blendMode'];
   copy['booleanOperation'] = original['booleanOperation'];
-  copy['constraints'] = original['constraints'];
+  // copy['constraints'] = original['constraints'];
   // copy['cornerRadius'] = original['cornerRadius'];
   // copy['cornerSmoothing'] = original['cornerSmoothing'];
   copy['dashPattern'] = original['dashPattern'];
@@ -359,7 +358,7 @@ function copyBooleanOperationNode(copy, original) {
 function copyStarNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['blendMode'] = original['blendMode'];
-  copy['constraints'] = original['constraints'];
+  // copy['constraints'] = original['constraints'];
   copy['cornerRadius'] = original['cornerRadius'];
   copy['cornerSmoothing'] = original['cornerSmoothing'];
   copy['dashPattern'] = original['dashPattern'];
@@ -394,7 +393,7 @@ function copyStarNode(copy, original) {
 function copyLineNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
 copy['blendMode'] = original['blendMode'];
-copy['constraints'] = original['constraints'];
+// copy['constraints'] = original['constraints'];
 copy['dashPattern'] = original['dashPattern'];
 copy['effectStyleId'] = original['effectStyleId'];
 copy['effects'] = original['effects'];
@@ -426,7 +425,7 @@ function copyEllipseNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
   // copy['arcData'] = original['arcData'];
   copy['blendMode'] = original['blendMode'];
-  copy['constraints'] = original['constraints'];
+  // copy['constraints'] = original['constraints'];
   // copy['cornerRadius'] = original['cornerRadius'];
   // copy['cornerSmoothing'] = original['cornerSmoothing'];
   copy['dashPattern'] = original['dashPattern'];
@@ -459,7 +458,7 @@ function copyEllipseNode(copy, original) {
 function copyPolygonNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['blendMode'] = original['blendMode'];
-  copy['constraints'] = original['constraints'];
+  // copy['constraints'] = original['constraints'];
   // copy['cornerRadius'] = original['cornerRadius'];
   // copy['cornerSmoothing'] = original['cornerSmoothing'];
   copy['dashPattern'] = original['dashPattern'];
@@ -495,7 +494,7 @@ function copyRectangleNode(copy, original) {
   copy['blendMode'] = original['blendMode'];
   // copy['bottomLeftRadius'] = original['bottomLeftRadius'];
   // copy['bottomRightRadius'] = original['bottomRightRadius'];
-  copy['constraints'] = original['constraints'];
+  // copy['constraints'] = original['constraints'];
   if (original['cornerRadius'] !== figma.mixed) {
     copy['cornerRadius'] = original['cornerRadius'];
   }
@@ -573,7 +572,7 @@ function copyTextNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['autoRename'] = original['autoRename'];
   copy['blendMode'] = original['blendMode'];
-  copy['constraints'] = original['constraints'];
+  // copy['constraints'] = original['constraints'];
   copy['dashPattern'] = original['dashPattern'];
   copy['effectStyleId'] = original['effectStyleId'];
   copy['effects'] = original['effects'];

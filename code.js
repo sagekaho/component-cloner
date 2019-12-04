@@ -1,12 +1,10 @@
 /*
 Component Cloner by Kate Miller (github: katekaho)
 
-Figma plugin which allows users to create a clone of component instances under a new master component
+Allows users to create a clone of component instances under a new master component
 
 Usage: Select the existing component instances of a master component you would like to clone.
 Then hit clone to create a new master component with the instances you selected attached to it
-
-Link: https://www.figma.com/c/plugin/736564662640346811/Component-Cloner
 
 */
 figma.showUI(__html__);
@@ -111,6 +109,7 @@ function verifyUserInput(currentPageSelection) {
     }
 }
 function cloneNodeBasedOnType(copy, original) {
+    // console.log(original);
     switch (original.type) {
         case 'SLICE':
             copySliceNode(copy, original);
@@ -204,7 +203,6 @@ this plugin from the original instances
 Commented out fields means they can't be copied since they are instances
 -----------------------------------------------------------------------------*/
 function copyFrameNode(copy, original) {
-    console.log(original);
     // copy['absoluteTransform'] = original['absoluteTransform'];
     copy['backgroundStyleId'] = original['backgroundStyleId'];
     copy['backgrounds'] = original['backgrounds'];
@@ -238,7 +236,7 @@ function copyFrameNode(copy, original) {
 function copyVectorNode(copy, original) {
     // copy['absoluteTransform'] = original['absoluteTransform'];
     copy['blendMode'] = original['blendMode'];
-    copy['constraints'] = original['constraints'];
+    // copy['constraints'] = original['constraints'];
     if (original['cornerRadius'] !== figma.mixed) {
         copy['cornerRadius'] = original['cornerRadius'];
     }
@@ -281,7 +279,7 @@ function copyBooleanOperationNode(copy, original) {
     copy['backgrounds'] = original['backgrounds'];
     copy['blendMode'] = original['blendMode'];
     copy['booleanOperation'] = original['booleanOperation'];
-    copy['constraints'] = original['constraints'];
+    // copy['constraints'] = original['constraints'];
     // copy['cornerRadius'] = original['cornerRadius'];
     // copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
@@ -319,7 +317,7 @@ function copyBooleanOperationNode(copy, original) {
 function copyStarNode(copy, original) {
     // copy['absoluteTransform'] = original['absoluteTransform'];
     copy['blendMode'] = original['blendMode'];
-    copy['constraints'] = original['constraints'];
+    // copy['constraints'] = original['constraints'];
     copy['cornerRadius'] = original['cornerRadius'];
     copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
@@ -353,7 +351,7 @@ function copyStarNode(copy, original) {
 function copyLineNode(copy, original) {
     // copy['absoluteTransform'] = original['absoluteTransform'];
     copy['blendMode'] = original['blendMode'];
-    copy['constraints'] = original['constraints'];
+    // copy['constraints'] = original['constraints'];
     copy['dashPattern'] = original['dashPattern'];
     copy['effectStyleId'] = original['effectStyleId'];
     copy['effects'] = original['effects'];
@@ -384,7 +382,7 @@ function copyEllipseNode(copy, original) {
     // copy['absoluteTransform'] = original['absoluteTransform'];
     // copy['arcData'] = original['arcData'];
     copy['blendMode'] = original['blendMode'];
-    copy['constraints'] = original['constraints'];
+    // copy['constraints'] = original['constraints'];
     // copy['cornerRadius'] = original['cornerRadius'];
     // copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
@@ -416,7 +414,7 @@ function copyEllipseNode(copy, original) {
 function copyPolygonNode(copy, original) {
     // copy['absoluteTransform'] = original['absoluteTransform'];
     copy['blendMode'] = original['blendMode'];
-    copy['constraints'] = original['constraints'];
+    // copy['constraints'] = original['constraints'];
     // copy['cornerRadius'] = original['cornerRadius'];
     // copy['cornerSmoothing'] = original['cornerSmoothing'];
     copy['dashPattern'] = original['dashPattern'];
@@ -451,7 +449,7 @@ function copyRectangleNode(copy, original) {
     copy['blendMode'] = original['blendMode'];
     // copy['bottomLeftRadius'] = original['bottomLeftRadius'];
     // copy['bottomRightRadius'] = original['bottomRightRadius'];
-    copy['constraints'] = original['constraints'];
+    // copy['constraints'] = original['constraints'];
     if (original['cornerRadius'] !== figma.mixed) {
         copy['cornerRadius'] = original['cornerRadius'];
     }
@@ -526,7 +524,7 @@ function copyTextNode(copy, original) {
     // copy['absoluteTransform'] = original['absoluteTransform'];
     copy['autoRename'] = original['autoRename'];
     copy['blendMode'] = original['blendMode'];
-    copy['constraints'] = original['constraints'];
+    // copy['constraints'] = original['constraints'];
     copy['dashPattern'] = original['dashPattern'];
     copy['effectStyleId'] = original['effectStyleId'];
     copy['effects'] = original['effects'];

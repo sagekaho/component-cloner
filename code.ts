@@ -220,7 +220,7 @@ function cloneNodes(currentPageSelection) {
   figma.viewport.scrollAndZoomIntoView(figma.currentPage.selection);
 
   // Close plugin after 1 second
-  // setTimeout(() => figma.closePlugin(), 900);
+  setTimeout(() => figma.closePlugin(), 900);
   
 }
 

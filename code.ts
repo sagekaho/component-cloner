@@ -125,7 +125,6 @@ function verifyUserInput(currentPageSelection: PageNode['selection']) {
 }
 
 function cloneNodeBasedOnType(copy: BaseNode, original: BaseNode) {
-  // console.log(original);
   switch (original.type) {
     case 'SLICE':
       copySliceNode(copy, original);
@@ -239,25 +238,24 @@ Commented out fields means they can't be copied since they are instances
 
 function copyFrameNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
-  copy['backgroundStyleId'] = original['backgroundStyleId'];
-  copy['backgrounds'] = original['backgrounds'];
+  // copy['backgroundStyleId'] = original['backgroundStyleId'];
+  // copy['backgrounds'] = original['backgrounds'];
   copy['blendMode'] = original['blendMode'];
-  copy['clipsContent'] = original['clipsContent'];
-  // copy['constraints'] = original['constraints'];
+  // copy['constrainProportions'] = original['constrainProportions'];
   copy['effectStyleId'] = original['effectStyleId'];
   copy['effects'] = original['effects'];
+  // copy['expanded'] = original['expanded'];
   copy['exportSettings'] = original['exportSettings'];
-  copy['gridStyleId'] = original['gridStyleId'];
-  copy['guides'] = original['guides'];
-  copy['layoutGrids'] = original['layoutGrids'];
+  // copy['isMask'] = original['isMask'];
+  // copy['layoutAlign'] = original['layoutAlign'];
   copy['locked'] = original['locked'];
   copy['name'] = original['name'];
   copy['opacity'] = original['opacity'];
   // copy['parent'] = original['parent'];
+  // copy['reactions'] = original['reactions'];
   // copy['relativeTransform'] = original['relativeTransform'];
   // copy['removed'] = original['removed'];
   // copy['rotation'] = original['rotation'];
-  // copy['type'] = original['type'];
   copy['visible'] = original['visible'];
   // copy['width'] = original['width'];
   // copy['x'] = original['x'];
@@ -627,6 +625,9 @@ function copyInstanceNode(copy, original) {
   // copy['absoluteTransform'] = original['absoluteTransform'];
   copy['backgroundStyleId'] = original['backgroundStyleId'];
   copy['backgrounds'] = original['backgrounds'];
+  copy['blendMode'] = original['blendMode'];
+  // copy['bottomLeftRadius'] = original['bottomLeftRadius'];
+  // copy['bottomRightRadius'] = original['bottomRightRadius'];
   copy['blendMode'] = original['blendMode'];
   copy['clipsContent'] = original['clipsContent'];
   copy['effectStyleId'] = original['effectStyleId'];
